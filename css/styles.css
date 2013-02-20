@@ -1,0 +1,25 @@
+.container{
+	margin: 0, auto;
+	text-align: center;
+}
+
+h1{
+	font-size: 50px;
+	font-weight: normal;
+}
+
+.span10{
+	margin-left: 100px;
+}
+
+.span6{
+	margin-left: 230px;
+}
+
+.nav-tabs{
+	margin-left: 180px;
+}
+
+#A:target{
+	z-index: 1;
+}
