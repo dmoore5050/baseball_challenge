@@ -1,17 +1,21 @@
-div#results {
+div#standings {
 	width: 500px;
 	margin: 50px auto 0 auto;
 }
-div#results th, div#results td {
+div#standings th, div#standings td {
 	width: 100px;
 	padding: 0 5px;
 	border: 1px solid black;
 }
-div#results tr>th:first-child {
+div#standings tr>th:first-child {
 	width: 20px;
 }
 div#userInput {
 	width: 500px;
-	margin: 50px auto 0 auto;
+	margin: 20px auto 0 auto;
 	text-align: center;
+}
+div#formAlert {
+	margin-top: 20px;
+	display: none;
 }
