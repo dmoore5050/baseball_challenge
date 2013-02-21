@@ -13,10 +13,143 @@
     <script src="js/jquery-1.9.1.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
 
+    <script type="text/javascript">
+    $(document).ready(function() {
+
+      // click event on team form modal button
+      $("#formModal").click(function() {
+
+        // define maximum number of teams
+        var maxTeams = 8;
+
+        // disable team form if too many teams
+        if (allTeams.length == maxTeams + 1) {
+          $("#formAlert").show();
+          return;
+        };
+
+      }); // end click
+
+      // create empty team array
+      var allTeams = new Array();
+
+      // click event on team form submit button
+      $("#createTeam").click(function() {
+
+        // clear the standings table
+        $("#standings table").html("<tr><th></th><th scope='col'>Team Name</th><th scopr='col'>Wins</th><th scope='col'>Losses</th><th scope='col'>Percentage</th></tr>");
+
+        // fill variables with input values
+        var teamName = $("#teamName").val();
+        var firstName = $("#firstName").val();
+        var lastName = $("#lastName").val();
+        var phone = $("#phone").val();
+        var sponsor = $("#sponsor").val();
+        var zip = $("#zip").val();
+
+        // create team object constructor
+        function Team(teamName, firstName, lastName, phone, sponsor, zip) {
+          this.teamName = teamName;
+          this.firstName = firstName;
+          this.lastName = lastName;
+          this.phone = phone;
+          this.sponsor = sponsor;
+          this.zip = zip;
+          this.wins = 0;
+          this.losses = 0;
+          this.percentage = 0;
+        }
+
+        // create new team
+        var newTeam = new Team(teamName, firstName, lastName, phone, sponsor, zip);
+
+        // add current team to team array
+        allTeams.push(newTeam);
+
+        // populate standings table with team data
+        for (var i = 0; i < allTeams.length; i++) {
+          $("#standings table").append("<tr><th>"  + (i+1) + "</th><td>" + allTeams[i].teamName + "</td><td>" + allTeams[i].wins + "</td><td>" + allTeams[i].losses + "</td><td>" + allTeams[i].percentage + "</td></tr>");
+        };
+
+      }); // end click
+
+    }); // end ready
+    </script>
   </head>
   <body>
     <!-- jack start here -->
+    <div id="standings">
+      <table>
+        <tr>
+          <th></th>
+          <th scope="col">Team Name</th>
+          <th scopr="col">Wins</th>
+          <th scope="col">Losses</th>
+          <th scope="col">Percentage</th>
+        </tr>
+      </table>
+    </div>
 
+    <div id="userInput">
+      <!-- button to trigger form modal -->
+      <a href="#formModal" role="button" class="btn" data-toggle="modal">Create Team</a>
+      <!-- alert when team form is disabled -->
+      <div id="formAlert" class="alert alert-error">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        Sorry, this league already has 8 teams!
+      </div>
+    </div><!-- end #userInput -->
+
+    <!-- form modal -->
+    <div id="formModal" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Team Information</h3>
+      </div><!-- end .modal-header -->
+      <div class="modal-body">
+        <form id="teamForm" class="form-horizontal">
+          <div class="control-group">
+            <label class="control-label" for="teamName">Team Name</label>
+            <div class="controls">
+              <input id="teamName" type="text" name="teamName" placeholder="Ex. Milwaukee Beers" />
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="firstName">Manager's First Name</label>
+            <div class="controls">
+              <input id="firstName" type="text" name="firstName" placeholder="Ex. Joe" />
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="lastName">Manager's Last Name</label>
+            <div class="controls">
+              <input id="lastName" type="text" name="lastName" placeholder="Ex. Cooper" />
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="phone">Phone Number</label>
+            <div class="controls">
+              <input id="phone" type="text" name="phone" placeholder="Ex. 555-555-BEER" />
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="sponsor">Team Sponsor</label>
+            <div class="controls">
+              <input id="sponsor" type="text" name="sponsor" placeholder="Ex. Milwaukee's Best" />
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="zip">Zip Code</label>
+            <div class="controls">
+              <input id="zip" type="text" name="zip" placeholder="Ex. 53201" />
+            </div>
+          </div>
+        </form>
+      </div><!-- end .modal-body -->
+      <div class="modal-footer">
+        <button id="createTeam" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
+      </div><!-- end .modal-footer -->
+    </div><!-- end .modal -->
 
     <!-- shearry start here -->
       <div class="container">

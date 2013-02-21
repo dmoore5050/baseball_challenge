@@ -1,25 +1,41 @@
 .container{
-	margin: 0, auto;
-	text-align: center;
+  margin: 0, auto;
+  text-align: center;
 }
-
 h1{
-	font-size: 50px;
-	font-weight: normal;
+  font-size: 50px;
+  font-weight: normal;
 }
-
 .span10{
-	margin-left: 100px;
+  margin-left: 100px;
 }
-
 .span6{
-	margin-left: 230px;
+  margin-left: 230px;
 }
-
 .nav-tabs{
-	margin-left: 180px;
+  margin-left: 180px;
 }
-
 #A:target{
-	z-index: 1;
+  z-index: 1;
+}
+div#standings {
+  width: 500px;
+  margin: 50px auto 0 auto;
+}
+div#standings th, div#standings td {
+  width: 100px;
+  padding: 0 5px;
+  border: 1px solid black;
+}
+div#standings tr>th:first-child {
+  width: 20px;
+}
+div#userInput {
+  width: 500px;
+  margin: 20px auto 0 auto;
+  text-align: center;
+}
+div#formAlert {
+  margin-top: 20px;
+  display: none;
 }
