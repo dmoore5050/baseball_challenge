@@ -9,6 +9,7 @@ div#mainContent {
 }
 div#formAlert {
   display: none;
+  text-align: center;
 }
 h3 {
   text-align: center;
