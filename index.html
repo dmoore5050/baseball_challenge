@@ -1,464 +1,303 @@
 <!DOCTYPE html>
 <html lang="en-US">
-  <head>
-    <meta charset="UTF-8">
-    <title>Beer League Baseball Challenge</title>
+<head>
+  <meta charset="UTF-8">
+  <title>Beer League Baseball Challenge</title>
 
-    <!-- css files -->
-    <link href="css/bootstrap.min.css" type="text/css" rel="stylesheet" />
-    <link href="css/bootstrap-responsive.min.css" type="text/css" rel="stylesheet" />
-    <link href="css/styles.css" type="text/css" rel="stylesheet" />
+  <!-- css files -->
+  <link href="css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+  <link href="css/bootstrap-responsive.min.css" type="text/css" rel="stylesheet" />
+  <link href="css/styles.css" type="text/css" rel="stylesheet" />
 
-    <!-- js files -->
-    <script src="js/jquery-1.9.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+  <!-- js files -->
+  <script src="js/jquery-1.9.1.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/schedule.js"></script>
 
-    <script type="text/javascript">
-    $(document).ready(function() {
+  <script type="text/javascript">
+  $(document).ready(function() {
 
-      // click event on team form modal button
-      $("#formModal").click(function() {
+    // create empty team array
+    var allTeams = new Array();
 
-        // define maximum number of teams
-        var maxTeams = 8;
+    // retrieve league data from server
+    // $.ajax({
+    //   url: 'backliftapp/team',
+    //   type: "GET",
+    //   dataType: "JSON",
+    //   success: function (data) {
+    //     for (var i = 0; i < data.length; i++) {
+    //       $("#standings tbody").append("<tr><th>"  + (i+1) + "</th><td>" + data[i].teamName + "</td><td>" + data[i].wins + "</td><td>" + data[i].losses + "</td><td>" + data[i].percentage + "</td></tr>");
+    //     };
+    //   }
+    // });
 
-        // disable team form if too many teams
-        if (allTeams.length == maxTeams + 1) {
-          $("#formAlert").show();
-          return;
+    // click event on team form submit button
+    $("#createTeam").click(function() {
+
+// ******************** standings script ************************
+// **************************************************************
+
+      // define min and max number of teams
+      var minTeams = 4;
+      var maxTeams = 8;
+
+      // show alert message if too many teams
+      if (allTeams.length == maxTeams) {
+        $("#formAlert").show();
+        $("#teamForm input").val("");
+        return;
+      };
+
+      // hide alert when dismissed
+      $("#alertClose").click(function() {
+        $("#formAlert").hide();
+      });
+
+      // clear the standings table
+      $("#standings tbody").html("");
+
+      // fill variables with input values
+      var teamName = $("#teamName").val();
+      var firstName = $("#firstName").val();
+      var lastName = $("#lastName").val();
+      var phone = $("#phone").val();
+      var sponsor = $("#sponsor").val();
+      var zip = $("#zip").val();
+
+      // create team object constructor
+      function Team(teamName, firstName, lastName, phone, sponsor, zip) {
+        this.teamID = allTeams.length + 1;
+        this.teamName = teamName;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.sponsor = sponsor;
+        this.zip = zip;
+        this.wins = 0;
+        this.losses = 0;
+        this.percentage = 0;
+      }
+
+      // create new team
+      var newTeam = new Team(teamName, firstName, lastName, phone, sponsor, zip);
+
+      // add current team to team array
+      allTeams.push(newTeam);
+
+      // send team data to server
+      // $.ajax({
+      //   url: 'backliftapp/team',
+      //   type: "POST",
+      //   dataType: "JSON",
+      //   data: newTeam,
+      //   success: function (data) {
+      //     for (var i = 0; i < data.length; i++) {
+      //       $("#standings tbody").append("<tr><th>"  + (i+1) + "</th><td>" + data[i].teamName + "</td><td>" + data[i].wins + "</td><td>" + data[i].losses + "</td><td>" + data[i].percentage + "</td></tr>");
+      //     };
+      //   }
+      // });
+
+      // populate standings table with team data
+      for (var i = 0; i < allTeams.length; i++) {
+        $("#standings tbody").append("<tr><th>"  + (i+1) + "</th><td>" + allTeams[i].teamName + "</td><td>" + allTeams[i].wins + "</td><td>" + allTeams[i].losses + "</td><td>" + allTeams[i].percentage + "</td></tr>");
+      };
+
+      // clear team form inputs
+      $("#teamForm input").val("");
+
+// ******************** schedule script *************************
+// **************************************************************
+
+      // determine schedule length
+      var schedule;
+      if (allTeams.length == 4 || allTeams.length == 5) {
+        schedule = sched4;
+      } else if (allTeams.length == 6 || allTeams.length == 7) {
+        schedule = sched6;
+      } else if (allTeams.length == 8) {
+        schedule = sched8;
+      };
+
+      // populate schedule table with data
+      if (allTeams.length >= minTeams) {
+
+        // clear the schedule table
+        $("#schedule ul").html("");
+        $("#schedule .tab-content").html("");
+
+        // create tabs and panes
+        for (var i = 0; i < (schedule.length); i++) {
+          $("#schedule ul").append("<li><a href='#week" + (i + 1) + "' " + "data-toggle='tab'>Week " + (i + 1) + "</a></li>");
+          $("#schedule .tab-content").append("<div id='week" + (i + 1) + "' " + "class='tab-pane'><table class='table table-striped'><thead><tr><th>Teams</th><th>Final Score</th></tr></thead><tbody></tbody></table></div>");
+
+          // write data to appropriate pane
+          for (var j = 0; j < schedule[i].length; j++) {
+            var home = schedule[i][j][0];
+            var away = schedule[i][j][1];
+            $("#week" + (i + 1) + " tbody").append("<tr><td>" + home + " vs. " + away + "</td><td>" + "Score!" + "</td></tr>");
+          };
         };
 
-      }); // end click
+        // make week 1 tab active
+        $("#schedule li:first-child").addClass("active");
+        $("#week1").addClass("active");
+      };
 
-      // create empty team array
-      var allTeams = new Array();
-
-      // click event on team form submit button
-      $("#createTeam").click(function() {
-
-        // clear the standings table
-        $("#standings table").html("<tr><th></th><th scope='col'>Team Name</th><th scopr='col'>Wins</th><th scope='col'>Losses</th><th scope='col'>Percentage</th></tr>");
-
-        // fill variables with input values
-        var teamName = $("#teamName").val();
-        var firstName = $("#firstName").val();
-        var lastName = $("#lastName").val();
-        var phone = $("#phone").val();
-        var sponsor = $("#sponsor").val();
-        var zip = $("#zip").val();
-
-        // create team object constructor
-        function Team(teamName, firstName, lastName, phone, sponsor, zip) {
-          this.teamName = teamName;
-          this.firstName = firstName;
-          this.lastName = lastName;
-          this.phone = phone;
-          this.sponsor = sponsor;
-          this.zip = zip;
-          this.wins = 0;
-          this.losses = 0;
-          this.percentage = 0;
-        }
-
-        // create new team
-        var newTeam = new Team(teamName, firstName, lastName, phone, sponsor, zip);
-
-        // add current team to team array
-        allTeams.push(newTeam);
-
-        // populate standings table with team data
-        for (var i = 0; i < allTeams.length; i++) {
-          $("#standings table").append("<tr><th>"  + (i+1) + "</th><td>" + allTeams[i].teamName + "</td><td>" + allTeams[i].wins + "</td><td>" + allTeams[i].losses + "</td><td>" + allTeams[i].percentage + "</td></tr>");
-        };
-
-      }); // end click
+    }); // end click
 
     // enter form validation here
 
 
 
-    }); // end ready
-    </script>
-  </head>
-  <body>
-    <div id="standings">
-      <table>
-        <tr>
-          <th></th>
-          <th scope="col">Team Name</th>
-          <th scopr="col">Wins</th>
-          <th scope="col">Losses</th>
-          <th scope="col">Percentage</th>
-        </tr>
-      </table>
-    </div>
+  }); // end ready
+  </script>
+</head>
+<body>
 
-    <div id="userInput">
-      <!-- button to trigger form modal -->
-      <a href="#formModal" role="button" class="btn" data-toggle="modal">Create Team</a>
-      <!-- alert when team form is disabled -->
-      <div id="formAlert" class="alert alert-error">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <!-- navbar -->
+  <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <ul class="nav">
+          <li><a href="#teamModal" data-toggle="modal">Create Team</a></li>
+          <li><a href="#scoreModal" data-toggle="modal">Report Score</a></li>
+        </ul>
+        <a id="title" class="brand pull-right" href="#">Beer League Baseball Challenge</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="mainContent" class="container">
+
+    <!-- alert message -->
+    <div class="row-fluid">
+      <div id="formAlert" class="alert alert-error span12">
+        <button id="alertClose" class="close" type="button">&times;</button>
         Sorry, this league already has 8 teams!
       </div>
-    </div><!-- end #userInput -->
+    </div>
 
-    <!-- form modal -->
-    <div id="formModal" class="modal hide fade">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>Team Information</h3>
-      </div><!-- end .modal-header -->
-      <div class="modal-body">
-        <form id="teamForm" class="form-horizontal">
-          <div class="control-group">
-            <label class="control-label" for="teamName">Team Name</label>
-            <div class="controls">
-              <input id="teamName" type="text" name="teamName" placeholder="Ex. Milwaukee Beers" />
-            </div>
-          </div>
-          <div class="control-group">
-            <label class="control-label" for="firstName">Manager's First Name</label>
-            <div class="controls">
-              <input id="firstName" type="text" name="firstName" placeholder="Ex. Joe" />
-            </div>
-          </div>
-          <div class="control-group">
-            <label class="control-label" for="lastName">Manager's Last Name</label>
-            <div class="controls">
-              <input id="lastName" type="text" name="lastName" placeholder="Ex. Cooper" />
-            </div>
-          </div>
-          <div class="control-group">
-            <label class="control-label" for="phone">Phone Number</label>
-            <div class="controls">
-              <input id="phone" type="text" name="phone" placeholder="Ex. 555-555-BEER" />
-            </div>
-          </div>
-          <div class="control-group">
-            <label class="control-label" for="sponsor">Team Sponsor</label>
-            <div class="controls">
-              <input id="sponsor" type="text" name="sponsor" placeholder="Ex. Milwaukee's Best" />
-            </div>
-          </div>
-          <div class="control-group">
-            <label class="control-label" for="zip">Zip Code</label>
-            <div class="controls">
-              <input id="zip" type="text" name="zip" placeholder="Ex. 53201" />
-            </div>
-          </div>
-        </form>
-      </div><!-- end .modal-body -->
-      <div class="modal-footer">
-        <button id="createTeam" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
-      </div><!-- end .modal-footer -->
-    </div><!-- end .modal -->
+    <div class="row-fluid">
 
-    <!-- page body ***************
-    ************************** -->
-
-    <div class="container">
-
-      <div class="span10 box">
-        <hgroup>
-          <!-- <h1>Beer and Veggie Dogs? League</h1> -->
-          <h3>Standings</h3>
-        </hgroup>
-        <table class="table table-striped"><!-- lead table -->
+      <!-- standings -->
+      <div id="standings" class="span5">
+        <h3>Standings</h3>
+        <table class="table table-striped">
           <thead>
             <tr>
               <th>Rank</th>
               <th>Team</th>
-              <th>W</th>
-              <th>L</th>
-              <th>%</th>
+              <th>Wins</th>
+              <th>Losses</th>
+              <th>Percentage</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>1</td>
-              <td>Beers</td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Swish</td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td>McCarthy</td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>4</td>
-              <td>Costas</td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>5</td>
-              <td>Squeak</td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>6</td>
-              <td>Vaughn</td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>7</td>
-              <td>Borgnine</td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>8</td>
-              <td>Reemer</td>
-              <td></td>
-              <td></td>
-            </tr>
           </tbody>
-        </table><!-- /lead table -->
-      </div><!-- /span10 box -->
+        </table>
+      </div>
 
       <!-- schedule/results -->
-      <h3>Schedule/Results</h3>
+      <div id="schedule" class="span7">
+        <h3>Schedule</h3>
+        <div class="tabbable tabs-left">
+          <!-- default tab -->
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#week1" data-toggle="tab">Week 1</a></li>
+          </ul>
+          <div class="tab-content">
+            <!-- default pane -->
+            <div id="week1" class="tab-pane active">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Teams</th>
+                    <th>Final Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
+            </div>
+          </div><!-- end .tab-content -->
+        </div><!-- end .tabbable -->
+      </div><!-- end .span6 -->
 
-      <div class="tabbable tabs-left">
+    </div><!-- end .row-fluid -->
 
-        <ul class="nav nav-tabs">
-          <li class="active"><a href="#A" data-toggle="tab">Week 1</a></li>
-          <li><a href="#B" data-toggle="tab">Week 2</a></li>
-          <li><a href="#C" data-toggle="tab">Week 3</a></li>
-          <li><a href="#C" data-toggle="tab">Week 4</a></li>
-          <li><a href="#C" data-toggle="tab">Week 5</a></li>
-          <li><a href="#C" data-toggle="tab">Week 6</a></li>
-          <li><a href="#C" data-toggle="tab">Week 7</a></li>
-        </ul>
+  <!-- team form modal -->
+  <div id="teamModal" class="modal hide fade">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>Team Information</h3>
+    </div>
+    <div class="modal-body">
+      <form id="teamForm" class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="teamName">Team Name</label>
+          <div class="controls">
+            <input id="teamName" type="text" name="teamName" placeholder="Ex. Milwaukee Beers" />
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="firstName">Manager's First Name</label>
+          <div class="controls">
+            <input id="firstName" type="text" name="firstName" placeholder="Ex. Joe" />
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="lastName">Manager's Last Name</label>
+          <div class="controls">
+            <input id="lastName" type="text" name="lastName" placeholder="Ex. Cooper" />
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="phone">Phone Number</label>
+          <div class="controls">
+            <input id="phone" type="text" name="phone" placeholder="Ex. 555-555-BEER" />
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="sponsor">Team Sponsor</label>
+          <div class="controls">
+            <input id="sponsor" type="text" name="sponsor" placeholder="Ex. Milwaukee's Best" />
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="zip">Zip Code</label>
+          <div class="controls">
+            <input id="zip" type="text" name="zip" placeholder="Ex. 53201" />
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button id="createTeam" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
+    </div>
+  </div><!-- end #teamModal -->
 
-        <div class="tab-content">
+  <!-- score form modal -->
+  <div id="scoreModal" class="modal hide fade">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>Report Score</h3>
+    </div>
+    <div class="modal-body">
+      <form id="teamForm" class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="teamName">Team Name</label>
+          <div class="controls">
+            <input id="teamName" type="text" name="teamName" placeholder="Ex. Milwaukee Beers" />
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button id="createTeam" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
+    </div>
+  </div><!-- end #scoreModal -->
 
-          <!-- start week 1 results -->
-          <div id="A" class="tab-pane active span6 box">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Week 1</th>
-                  <th>Final Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Beers vs Reemer</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Swish vs Borgnine</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>McCarthy vs Vaughn</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Costas vs Squeak</td>
-                  <td>0-0</td>
-                </tr>
-              </tbody>
-            </table>
-          </div><!-- / week 1 results -->
-
-          <!-- start week 2 results -->
-          <div id="B" class="tab-pane span6 box">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Week 2</th>
-                  <th>Final Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Beers vs Borgnine</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Vaughn vs Reemer</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Swish vs Squeak</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>McCarthy vs Costas</td>
-                  <td>0-0</td>
-                </tr>
-              </tbody>
-            </table>
-          </div><!-- / week 2 results -->
-
-          <!-- start week 3 results -->
-          <div id="C" class="tab-pane span6 box">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Week 3</th>
-                  <th>Final Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Beers vs Vaughn</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Squeak vs Borgnine</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Costas vs Reemer</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Swish vs McCarthy</td>
-                  <td>0-0</td>
-                </tr>
-              </tbody>
-            </table>
-          </div><!-- / week 3 results -->
-
-          <!-- start week 4 results -->
-          <div id="D" class="tab-pane span6 box">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Week 4</th>
-                  <th>Final Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Beers vs Squeak</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Costas vs Vaughn</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>McCarthy vs Borgnine</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Swish vs Reemer</td>
-                  <td>0-0</td>
-                </tr>
-              </tbody>
-            </table>
-          </div><!-- / week 4 results -->
-
-          <!-- start week 5 results -->
-          <div id="E" class="tab-pane span6 box">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Week 5</th>
-                  <th>Final Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Beers vs Costas</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>McCarthy vs Squeak</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Swish vs Vaughn</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Borgnine vs Reemer</td>
-                  <td>0-0</td>
-                </tr>
-              </tbody>
-            </table>
-          </div><!-- / week 5 results -->
-
-          <!-- start week 6 results -->
-          <div id="F" class="tab-pane span6 box">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Week 6</th>
-                  <th>Final Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Beers vs McCarthy</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Swish vs Costas</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Squeak vs Reemer</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Vaughn vs Borgnine</td>
-                  <td>0-0</td>
-                </tr>
-              </tbody>
-            </table>
-          </div><!-- / week 6 results -->
-
-          <!-- start week 7 results -->
-          <div id="G" class="tab-pane span6 box">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Week 7</th>
-                  <th>Final Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Beers vs Swish</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>McCarthy vs Reemer</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Costas vs Borgnine</td>
-                  <td>0-0</td>
-                </tr>
-                <tr>
-                  <td>Squeak vs Vaughn</td>
-                  <td>0-0</td>
-                </tr>
-              </tbody>
-            </table>
-          </div><!-- / week 7 results -->
-
-        </div><!-- / .tab-content -->
-
-      </div><!-- /tabbable -->
-
-    </div><!-- / .container -->
-
-  </body>
+  </div><!-- end .container -->
+</body>
 </html>
