@@ -34,27 +34,23 @@
       type: "GET",
       dataType: "JSON",
       success: function (data) {
+
+        // fill league array with data
         league = data;
+
+        // populate standings table
         for (var i = 0; i < league.length; i++) {
-          $("#standings tbody").append("<tr><th>"  + (i+1) + "</th><td>" + league[i].teamName + "</td><td>" + league[i].wins + "</td><td>" + league[i].losses + "</td><td>" + league[i].percentage + "</td><td><button class='btn btn-danger btn-mini' type='button'>Delete</button></td></tr>");
+          $("#standings tbody").append("<tr><th>"  + (i+1) + "</th><td>" + league[i].teamName + "</td><td>" + league[i].wins + "</td><td>" + league[i].losses + "</td><td>" + league[i].percentage + "</td><td><button class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>");
         };
+
+        // make delete buttons functional
+        deleteTeam();
+
+        // populate schedule table
         updateSchedule();
+
       }
-    });
-
-// ******************** delete teams *************************
-
-    // delete first team in array
-    $("#delete").click(function() {
-      $.ajax({
-        url: "/backliftapp/team/" + league[0].id,
-        type: "DELETE",
-        dataType: "JSON",
-        success: function (data) {
-          console.log("Item deleted.");
-        }
-      });
-    });
+    }); // end GET
 
 // *********** create new team / update standings ************
 
@@ -73,48 +69,43 @@
         $("#formAlert").hide();
       });
 
-      // fill variables with input values
-      var teamName = $("#teamName").val();
-      var firstName = $("#firstName").val();
-      var lastName = $("#lastName").val();
-      var phone = $("#phone").val();
-      var sponsor = $("#sponsor").val();
-      var zip = $("#zip").val();
-
-      // create team object constructor
-      function Team(teamName, firstName, lastName, phone, sponsor, zip) {
-        this.teamID = league.length + 1;
-        this.teamName = teamName;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phone = phone;
-        this.sponsor = sponsor;
-        this.zip = zip;
-        this.wins = 0;
-        this.losses = 0;
-        this.percentage = 0;
-      };
-
-      // create new team
-      var newTeam = new Team(teamName, firstName, lastName, phone, sponsor, zip);
-
-      // clear the standings table
-      $("#standings tbody").html("");
-
       // send team data to server
       $.ajax({
         url: '/backliftapp/team',
         type: "POST",
         dataType: "JSON",
-        data: newTeam,
+        data: {
+        teamName: $("#teamName").val(),
+        firstName: $("#firstName").val(),
+        lastName: $("#lastName").val(),
+        phone: $("#phone").val(),
+        sponsor: $("#sponsor").val(),
+        zip: $("#zip").val(),
+        wins: 0,
+        losses: 0,
+        percentage: 0
+        },
         success: function (data) {
+
+          // update league array
           league.push(data);
+
+          // clear the standings table
+          $("#standings tbody").html("");
+
+          // update standings table
           for (var i = 0; i < league.length; i++) {
-            $("#standings tbody").append("<tr><th>"  + (i+1) + "</th><td>" + league[i].teamName + "</td><td>" + league[i].wins + "</td><td>" + league[i].losses + "</td><td>" + league[i].percentage + "</td><td><button class='btn btn-danger btn-mini' type='button'>Delete</button></td></tr>");
+            $("#standings tbody").append("<tr><th>"  + (i+1) + "</th><td>" + league[i].teamName + "</td><td>" + league[i].wins + "</td><td>" + league[i].losses + "</td><td>" + league[i].percentage + "</td><td><button class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>");
           };
+
+          // make delete buttons functional
+          deleteTeam();
+
+          // update schedule table
           updateSchedule();
+
         }
-      });
+      }); // end POST
 
       // clear team form inputs
       $("#teamForm input").val("");
@@ -135,7 +126,7 @@
         schedule = sched8;
       };
 
-      // populate schedule table with data
+      // verify league has enough teams
       if (league.length >= minTeams) {
 
         // clear the schedule table
@@ -147,20 +138,59 @@
           $("#schedule ul").append("<li><a href='#week" + (i + 1) + "' " + "data-toggle='tab'>Week " + (i + 1) + "</a></li>");
           $("#schedule .tab-content").append("<div id='week" + (i + 1) + "' " + "class='tab-pane'><table class='table table-striped'><thead><tr><th>Teams</th><th>Final Score</th></tr></thead><tbody></tbody></table></div>");
 
-          // write data to appropriate pane
+          // write data to appropriate panes
           for (var j = 0; j < schedule[i].length; j++) {
             var home = schedule[i][j][0];
             var away = schedule[i][j][1];
             $("#week" + (i + 1) + " tbody").append("<tr><td>" + home + " vs. " + away + "</td><td>" + "Score!" + "</td></tr>");
           };
-        };
+
+        }; // end for loop
 
         // make week 1 tab active
         $("#schedule li:first-child").addClass("active");
         $("#week1").addClass("active");
-      };
+      
+      }; // end if statment
 
     }; // end updateSchedule
+
+// *************** make delete button functional ****************
+
+    function deleteTeam() {
+
+      // click event on delete buttons
+      $(".delete").on("click", function() {
+
+        // delete team data from server
+        $.ajax({
+          url: "/backliftapp/team/" + league[0].id,
+          type: "DELETE",
+          dataType: "JSON",
+          success: function () {
+            
+            // remove team from league array
+            league.shift();
+
+            // clear the standings table
+            $("#standings tbody").html("");
+
+            // populate standings table
+            for (var i = 0; i < league.length; i++) {
+              $("#standings tbody").append("<tr><th>"  + (i+1) + "</th><td>" + league[i].teamName + "</td><td>" + league[i].wins + "</td><td>" + league[i].losses + "</td><td>" + league[i].percentage + "</td><td><button class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>");
+            };
+
+            // make new delete buttons functional
+            deleteTeam();
+
+          }
+        }); // end DELETE
+
+      }); // end click
+
+    }; // end deleteTeam
+
+// ********************* form validation **********************
 
     // enter form validation here
 
@@ -178,7 +208,6 @@
         <ul class="nav">
           <li><a href="#teamModal" data-toggle="modal">Create Team</a></li>
           <li><a href="#scoreModal" data-toggle="modal">Report Score</a></li>
-          <li><a id="delete" href="#">Delete</a></li>
         </ul>
         <a id="title" class="brand pull-right" href="#">Beer League Baseball Challenge</a>
       </div>
