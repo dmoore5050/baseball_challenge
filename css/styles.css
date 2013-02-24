@@ -14,3 +14,15 @@ div#formAlert {
 h3 {
   text-align: center;
 }
+th.center, td.center {
+	text-align: center;
+}
+th.rank {
+	width: 40px;
+}
+td.name {
+	width: 135px;
+}
+th.record, td.record {
+	width: 50px;
+}

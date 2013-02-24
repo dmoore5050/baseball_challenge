@@ -39,9 +39,7 @@
         league = data;
 
         // populate standings table
-        for (var i = 0; i < league.length; i++) {
-          $("#standings tbody").append("<tr><th>"  + (i+1) + "</th><td>" + league[i].teamName + "</td><td>" + league[i].wins + "</td><td>" + league[i].losses + "</td><td>" + league[i].percentage + "</td><td><button class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>");
-        };
+        updateStandings();
 
         // make delete buttons functional
         deleteTeam();
@@ -52,7 +50,7 @@
       }
     }); // end GET
 
-// *********** create new team / update standings ************
+// ********************* create new team ***********************
 
     // click event on team form submit button
     $("#createTeam").click(function() {
@@ -94,9 +92,7 @@
           $("#standings tbody").html("");
 
           // update standings table
-          for (var i = 0; i < league.length; i++) {
-            $("#standings tbody").append("<tr><th>"  + (i+1) + "</th><td>" + league[i].teamName + "</td><td>" + league[i].wins + "</td><td>" + league[i].losses + "</td><td>" + league[i].percentage + "</td><td><button class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>");
-          };
+          updateStandings();
 
           // make delete buttons functional
           deleteTeam();
@@ -112,13 +108,27 @@
 
     }); // end click
 
+// ******************** update standings ************************
+
+    // populate standings table
+    function updateStandings() {
+      for (var i = 0; i < league.length; i++) {
+        $("#standings tbody").append("<tr><th class='rank'>" + (i + 1) + ".</th><td class='name'>" + league[i].teamName + "</td><td class='record center'>" + league[i].wins + "</td><td class='record center'>" + league[i].losses + "</td><td class='record center'>" + league[i].percentage + "</td><td><button id='" + i + "' class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>");
+      };
+    };
+
 // ******************** update schedule *************************
 
     function updateSchedule() {
+ 
+      // create empty schedule array
+      var schedule = new Array();
 
       // determine schedule length
-      var schedule;
-      if (league.length == 4 || league.length == 5) {
+      if (league.length < minTeams) {
+          $("#schedule ul").html("<li class='active'><a href='#week1' data-toggle='tab'>Week 1</a></li>");
+          $("#schedule .tab-content").html("<div id='week1' class='tab-pane active'><table class='table table-striped'><thead><tr><th>Teams</th><th class='center'>Final Score</th></tr></thead><tbody></tbody></table></div>");
+      } else if (league.length == 4 || league.length == 5) {
         schedule = sched4;
       } else if (league.length == 6 || league.length == 7) {
         schedule = sched6;
@@ -134,28 +144,28 @@
         $("#schedule .tab-content").html("");
 
         // create tabs and panes
-        for (var i = 0; i < (schedule.length); i++) {
+        for (var i = 0; i < schedule.length; i++) {
           $("#schedule ul").append("<li><a href='#week" + (i + 1) + "' " + "data-toggle='tab'>Week " + (i + 1) + "</a></li>");
-          $("#schedule .tab-content").append("<div id='week" + (i + 1) + "' " + "class='tab-pane'><table class='table table-striped'><thead><tr><th>Teams</th><th>Final Score</th></tr></thead><tbody></tbody></table></div>");
+          $("#schedule .tab-content").append("<div id='week" + (i + 1) + "' " + "class='tab-pane'><table class='table table-striped'><thead><tr><th>Teams</th><th class='center'>Final Score</th></tr></thead><tbody></tbody></table></div>");
 
           // write data to appropriate panes
           for (var j = 0; j < schedule[i].length; j++) {
-            var home = schedule[i][j][0];
-            var away = schedule[i][j][1];
-            $("#week" + (i + 1) + " tbody").append("<tr><td>" + home + " vs. " + away + "</td><td>" + "Score!" + "</td></tr>");
+            var home = league[schedule[i][j][0] - 1].teamName;
+            var away = league[schedule[i][j][1] - 1].teamName;
+            $("#week" + (i + 1) + " tbody").append("<tr><td>" + home + " vs. " + away + "</td><td class='center'>" + "Score!" + "</td></tr>");
           };
 
         }; // end for loop
 
         // make week 1 tab active
         $("#schedule li:first-child").addClass("active");
-        $("#week1").addClass("active");
-      
+        $("#week1").addClass("active");  
+
       }; // end if statment
 
     }; // end updateSchedule
 
-// *************** make delete button functional ****************
+// ************************ delete team **************************
 
     function deleteTeam() {
 
@@ -164,24 +174,34 @@
 
         // delete team data from server
         $.ajax({
-          url: "/backliftapp/team/" + league[0].id,
+          url: "/backliftapp/team/" + league[$(this).attr("id")].id,
           type: "DELETE",
           dataType: "JSON",
           success: function () {
-            
-            // remove team from league array
-            league.shift();
 
-            // clear the standings table
-            $("#standings tbody").html("");
+            $.ajax({
+              url: '/backliftapp/team',
+              type: "GET",
+              dataType: "JSON",
+              success: function (data) {
 
-            // populate standings table
-            for (var i = 0; i < league.length; i++) {
-              $("#standings tbody").append("<tr><th>"  + (i+1) + "</th><td>" + league[i].teamName + "</td><td>" + league[i].wins + "</td><td>" + league[i].losses + "</td><td>" + league[i].percentage + "</td><td><button class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>");
-            };
+                // fill league array with data
+                league = data;
 
-            // make new delete buttons functional
-            deleteTeam();
+                // clear the standings table
+                $("#standings tbody").html("");
+
+                // populate standings table
+                updateStandings();
+
+                // make delete buttons functional
+                deleteTeam();
+
+                // populate schedule table
+                updateSchedule();
+
+              }
+            }); // end GET
 
           }
         }); // end DELETE
@@ -227,16 +247,16 @@
     <div class="row-fluid">
 
       <!-- standings -->
-      <div id="standings" class="span5">
+      <div id="standings" class="span6">
         <h3>Standings</h3>
         <table class="table table-striped">
           <thead>
             <tr>
               <th>Rank</th>
               <th>Team</th>
-              <th>Wins</th>
-              <th>Losses</th>
-              <th>Percentage</th>
+              <th class="record center">Wins</th>
+              <th class="record center">Losses</th>
+              <th class="record center">Perc.</th>
             </tr>
           </thead>
           <tbody>
@@ -245,7 +265,7 @@
       </div>
 
       <!-- schedule/results -->
-      <div id="schedule" class="span7">
+      <div id="schedule" class="span6">
         <h3>Schedule</h3>
         <div class="tabbable tabs-left">
           <!-- default tab -->
@@ -259,7 +279,7 @@
                 <thead>
                   <tr>
                     <th>Teams</th>
-                    <th>Final Score</th>
+                    <th class="center">Final Score</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -272,77 +292,77 @@
 
     </div><!-- end .row-fluid -->
 
-  <!-- team form modal -->
-  <div id="teamModal" class="modal hide fade">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3>Team Information</h3>
-    </div>
-    <div class="modal-body">
-      <form id="teamForm" class="form-horizontal">
-        <div class="control-group">
-          <label class="control-label" for="teamName">Team Name</label>
-          <div class="controls">
-            <input id="teamName" type="text" name="teamName" placeholder="Ex. Milwaukee Beers" />
+    <!-- team form modal -->
+    <div id="teamModal" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Team Information</h3>
+      </div>
+      <div class="modal-body">
+        <form id="teamForm" class="form-horizontal">
+          <div class="control-group">
+            <label class="control-label" for="teamName">Team Name</label>
+            <div class="controls">
+              <input id="teamName" type="text" name="teamName" placeholder="Ex. Milwaukee Beers" />
+            </div>
           </div>
-        </div>
-        <div class="control-group">
-          <label class="control-label" for="firstName">Manager's First Name</label>
-          <div class="controls">
-            <input id="firstName" type="text" name="firstName" placeholder="Ex. Joe" />
+          <div class="control-group">
+            <label class="control-label" for="firstName">Manager's First Name</label>
+            <div class="controls">
+              <input id="firstName" type="text" name="firstName" placeholder="Ex. Joe" />
+            </div>
           </div>
-        </div>
-        <div class="control-group">
-          <label class="control-label" for="lastName">Manager's Last Name</label>
-          <div class="controls">
-            <input id="lastName" type="text" name="lastName" placeholder="Ex. Cooper" />
+          <div class="control-group">
+            <label class="control-label" for="lastName">Manager's Last Name</label>
+            <div class="controls">
+              <input id="lastName" type="text" name="lastName" placeholder="Ex. Cooper" />
+            </div>
           </div>
-        </div>
-        <div class="control-group">
-          <label class="control-label" for="phone">Phone Number</label>
-          <div class="controls">
-            <input id="phone" type="text" name="phone" placeholder="Ex. 555-555-BEER" />
+          <div class="control-group">
+            <label class="control-label" for="phone">Phone Number</label>
+            <div class="controls">
+              <input id="phone" type="text" name="phone" placeholder="Ex. 555-555-BEER" />
+            </div>
           </div>
-        </div>
-        <div class="control-group">
-          <label class="control-label" for="sponsor">Team Sponsor</label>
-          <div class="controls">
-            <input id="sponsor" type="text" name="sponsor" placeholder="Ex. Milwaukee's Best" />
+          <div class="control-group">
+            <label class="control-label" for="sponsor">Team Sponsor</label>
+            <div class="controls">
+              <input id="sponsor" type="text" name="sponsor" placeholder="Ex. Milwaukee's Best" />
+            </div>
           </div>
-        </div>
-        <div class="control-group">
-          <label class="control-label" for="zip">Zip Code</label>
-          <div class="controls">
-            <input id="zip" type="text" name="zip" placeholder="Ex. 53201" />
+          <div class="control-group">
+            <label class="control-label" for="zip">Zip Code</label>
+            <div class="controls">
+              <input id="zip" type="text" name="zip" placeholder="Ex. 53201" />
+            </div>
           </div>
-        </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button id="createTeam" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
-    </div>
-  </div><!-- end #teamModal -->
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="createTeam" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
+      </div>
+    </div><!-- end #teamModal -->
 
-  <!-- score form modal -->
-  <div id="scoreModal" class="modal hide fade">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3>Report Score</h3>
-    </div>
-    <div class="modal-body">
-      <form id="teamForm" class="form-horizontal">
-        <div class="control-group">
-          <label class="control-label" for="teamName">Team Name</label>
-          <div class="controls">
-            <input id="teamName" type="text" name="teamName" placeholder="Ex. Milwaukee Beers" />
+    <!-- score form modal -->
+    <div id="scoreModal" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Report Score</h3>
+      </div>
+      <div class="modal-body">
+        <form id="teamForm" class="form-horizontal">
+          <div class="control-group">
+            <label class="control-label" for="teamName">Team Name</label>
+            <div class="controls">
+              <input id="teamName" type="text" name="teamName" placeholder="Ex. Milwaukee Beers" />
+            </div>
           </div>
-        </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button id="createTeam" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
-    </div>
-  </div><!-- end #scoreModal -->
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="createTeam" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
+      </div>
+    </div><!-- end #scoreModal -->
 
   </div><!-- end .container -->
 </body>
