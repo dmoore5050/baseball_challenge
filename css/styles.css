@@ -7,7 +7,7 @@ a#title {
 div#mainContent {
   margin-top: 40px;
 }
-div#formAlert {
+div#formAlert, div#startSeason {
   display: none;
   text-align: center;
 }
