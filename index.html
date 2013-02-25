@@ -145,7 +145,7 @@
           dataType: "JSON",
           success: function () {
 
-            console.log("Game deleted.");
+            console.log("Scores cleared.");
 
           }
         }); // end DELETE
@@ -243,19 +243,18 @@
           // populate schedule with game data
           for (var j = 0; j < schedule[i].length; j++) {
             
-            // fill variables with team names
+            // fill variables with initial values
             var home = league[schedule[i][j][0] - 1].teamName;
             var away = league[schedule[i][j][1] - 1].teamName;
+            var homeFinal = 0;
+            var awayFinal = 0;
 
             // find correct scores in scores array
             for (var k = 0; k < scores.length; k++) {
               if (scores[k].homeName == home && scores[k].awayName == away) {
-                var homeFinal = scores[k].homeScore;
-                var awayFinal = scores[k].awayScore;
-              } else {
-                var homeFinal = 0;
-                var awayFinal = 0;
-              };
+                homeFinal = scores[k].homeScore;
+                awayFinal = scores[k].awayScore;
+              }
             };
 
             // write game data to appropriate panes
@@ -278,6 +277,11 @@
 
 // ********************** report score ************************
 
+// $('#schedule').on('click', '.score', function(){
+//   $(this).
+//   reportScore(hometeam, awayteam, hscore, ascore);
+// });
+
     function reportScore() {
 
       // click event on report score links
@@ -292,7 +296,7 @@
         var awayTeam = league[schedule[week][game][1] - 1].teamName;
 
         // click event on score form submit button
-        $("#reportScore").click(function() {
+        $("#reportScore").one('click', function() {
 
           // send game data to server
           $.ajax({
