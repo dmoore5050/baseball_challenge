@@ -17,59 +17,125 @@
   <script type="text/javascript">
   $(document).ready(function() {
 
-// ******************* declare variables ************************
+// ***************** declare global variables *******************
 
     // define min and max number of teams
     var minTeams = 4;
     var maxTeams = 8;
 
-    // create empty team array
-    var league = new Array();
+    // create empty arrays
+    var league, schedule, scores = new Array();
 
-// ******************** get league data *************************
+// ****************** max team alert message ********************
 
-    // retrieve league data from server
+    // show alert message if too many teams
+    $("a[href='#teamModal']").click(function() {
+      if (league.length == maxTeams) {
+        $("#formAlert").show();
+        return false;
+      };
+    });
+
+    // hide alert when dismissed
+    $("#alertClose").click(function() {
+      $("#formAlert").hide();
+    });
+
+// ***************** get game and league data *******************
+// Game data is retrieved before league data so that scores will
+// be available to the updateSchedule function.
+
+    // retrieve game data from server
     $.ajax({
-      url: '/backliftapp/team',
+      url: "/backliftapp/game",
       type: "GET",
       dataType: "JSON",
       success: function (data) {
 
-        // fill league array with data
-        league = data;
+        // fill scores array with data
+        scores = data;
 
-        // populate standings table
-        updateStandings();
+        // confirm contents of scores array
+        console.log(scores);
 
-        // make delete buttons functional
-        deleteTeam();
+        // retrieve league data from server
+        $.ajax({
+          url: "/backliftapp/team",
+          type: "GET",
+          dataType: "JSON",
+          success: function (data) {
 
-        // populate schedule table
-        updateSchedule();
+            // fill league array with data
+            league = data;
+
+            // confirm contents of league array
+            console.log(league);
+
+            // populate standings table
+            updateStandings();
+
+            // click event on delete buttons
+            $("#standings").on("click", ".delete", function() {
+              var teamID = $(this).attr("id");
+              deleteTeam(teamID);
+            });
+
+            // populate schedule table
+            updateSchedule();
+
+            // check if season can start
+            startSeason();
+
+          }
+        }); // end GET
 
       }
     }); // end GET
+
+// ************ make report score links functional *************
+
+    // create empty team name variables
+    var homeTeam, awayTeam;
+
+    // click event on report score links
+    $(".tab-content").on("click", ".score", function() {
+
+      // fill variables with schedule index values
+      var week = $(this).attr("data-week");
+      var game = $(this).attr("data-game");
+
+      // fill variables with team objects
+      homeTeam = league[schedule[week][game][0] - 1];
+      awayTeam = league[schedule[week][game][1] - 1];
+
+      // write team names to score form
+      $("#marquee").html("<span id='homeTeam'>" + homeTeam.teamName + "</span>vs.<span id='awayTeam'>" + awayTeam.teamName + "</span>");
+
+    }); // end click
+
+
+// ********** make score form submit button functional **********
+
+    // click event on score form submit button
+    $("#reportScore").click(function() {
+
+      // fill variables with scores
+      var homeScore = $("#homeScore").val();
+      var awayScore = $("#awayScore").val();
+
+      // send game data to server
+      reportScore(homeTeam, awayTeam, homeScore, awayScore);
+
+    }); // end click
 
 // ********************* create new team ***********************
 
     // click event on team form submit button
     $("#createTeam").click(function() {
 
-      // show alert message if too many teams
-      if (league.length == maxTeams) {
-        $("#formAlert").show();
-        $("#teamForm input").val("");
-        return;
-      };
-
-      // hide alert when dismissed
-      $("#alertClose").click(function() {
-        $("#formAlert").hide();
-      });
-
       // send team data to server
       $.ajax({
-        url: '/backliftapp/team',
+        url: "/backliftapp/team",
         type: "POST",
         dataType: "JSON",
         data: {
@@ -88,17 +154,20 @@
           // update league array
           league.push(data);
 
-          // clear the standings table
-          $("#standings tbody").html("");
-
           // update standings table
           updateStandings();
 
-          // make delete buttons functional
-          deleteTeam();
+          // click event on delete buttons
+          $("#standings").on("click", ".delete", function() {
+            var teamID = $(this).attr("id");
+            deleteTeam(teamID);
+          });
 
           // update schedule table
           updateSchedule();
+
+          // check if season can start
+          startSeason();
 
         }
       }); // end POST
@@ -108,21 +177,96 @@
 
     }); // end click
 
+// ********************** clear scores ***********************
+
+    $("#clearScores").click(function() {
+
+      for (var i = 0; i < scores.length; i ++) {
+
+        // delete all game data from server
+        $.ajax({
+          url: "/backliftapp/game/" + scores[i].id,
+          type: "DELETE",
+          dataType: "JSON",
+          success: function () {
+
+            console.log("Scores cleared.");
+
+          }
+        }); // end DELETE
+
+      }; // end for loop
+
+    }); // end click
+
+// *********************** start season ************************
+
+    // hide delete and start season buttons
+    $("#startSeason button").click(function() {
+      $(".delete").hide();
+      $(this).hide();
+    });
+
 // ******************** update standings ************************
 
-    // populate standings table
     function updateStandings() {
+
+      // clear standings table
+      $("#standings tbody").html("");
+
+      // populate standings table
       for (var i = 0; i < league.length; i++) {
-        $("#standings tbody").append("<tr><th class='rank'>" + (i + 1) + ".</th><td class='name'>" + league[i].teamName + "</td><td class='record center'>" + league[i].wins + "</td><td class='record center'>" + league[i].losses + "</td><td class='record center'>" + league[i].percentage + "</td><td><button id='" + i + "' class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>");
+        $("#standings tbody").append("<tr><th class='rank'>" + (i + 1) + ".</th><td class='name'>" + league[i].teamName + "</td><td class='record center'>" + league[i].wins + "</td><td class='record center'>" + league[i].losses + "</td><td class='record center'>" + league[i].percentage + "</td><td><button id='" + league[i].id + "' class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>");
       };
-    };
+    }; // end updateStandings
+
+// ************************ delete team **************************
+
+    function deleteTeam(teamID) {
+
+      // delete team data from server
+      $.ajax({
+        url: "/backliftapp/team/" + teamID,
+        type: "DELETE",
+        dataType: "JSON",
+        success: function () {
+
+          // retrieve league data from server
+          $.ajax({
+            url: '/backliftapp/team',
+            type: "GET",
+            dataType: "JSON",
+            success: function (data) {
+
+              // update league array
+              league = data;
+
+              // update standings table
+              updateStandings();
+
+              // click event on delete buttons
+              $("#standings").on("click", ".delete", function() {
+                var teamID = $(this).attr("id");
+                deleteTeam(teamID);
+              });
+
+              // update schedule table
+              updateSchedule();
+
+             // check if season can start
+              startSeason();
+
+            }
+          }); // end GET
+
+        }
+      }); // end DELETE
+
+    }; // end deleteTeam
 
 // ******************** update schedule *************************
 
     function updateSchedule() {
- 
-      // create empty schedule array
-      var schedule = new Array();
 
       // determine schedule length
       if (league.length < minTeams) {
@@ -139,7 +283,7 @@
       // verify league has enough teams
       if (league.length >= minTeams) {
 
-        // clear the schedule table
+        // clear schedule table
         $("#schedule ul").html("");
         $("#schedule .tab-content").html("");
 
@@ -148,39 +292,123 @@
           $("#schedule ul").append("<li><a href='#week" + (i + 1) + "' " + "data-toggle='tab'>Week " + (i + 1) + "</a></li>");
           $("#schedule .tab-content").append("<div id='week" + (i + 1) + "' " + "class='tab-pane'><table class='table table-striped'><thead><tr><th>Teams</th><th class='center'>Final Score</th></tr></thead><tbody></tbody></table></div>");
 
-          // write data to appropriate panes
+          // // create bye weeks
+          // // Team 1 on the schedule becomes a ghost team,
+          // // and whichever team plays them has a bye week.
+          // if (league.length % 2 == 1) {
+
+          //   // write bye weeks to appropriate panes
+          //   $("#week" + (i + 1) + " tbody").append("<tr><td>" + league[schedule[i][0][1] - 1].teamName + "</td><td class='center'>Bye</td><td><a data-week='" + i + "' data-game='" + j + "' class='score' href='#scoreModal' data-toggle='modal'>Report Score</a></td></tr>");
+
+          //   // start the for loop on the second game of the week
+          //   var j = 1;
+
+          // }; // end if statement
+
+          // populate schedule with game data
           for (var j = 0; j < schedule[i].length; j++) {
+            
+            // fill variables with initial values
             var home = league[schedule[i][j][0] - 1].teamName;
             var away = league[schedule[i][j][1] - 1].teamName;
-            $("#week" + (i + 1) + " tbody").append("<tr><td>" + home + " vs. " + away + "</td><td class='center'>" + "Score!" + "</td></tr>");
-          };
+            var homeFinal = 0;
+            var awayFinal = 0;
+
+            // find correct scores in scores array
+            for (var k = 0; k < scores.length; k++) {
+              if (scores[k].homeName == home && scores[k].awayName == away) {
+                homeFinal = scores[k].homeScore;
+                awayFinal = scores[k].awayScore;
+              }
+            };
+
+            // write game data to panes
+            $("#week" + (i + 1) + " tbody").append("<tr><td>" + home + " vs. " + away + "</td><td class='center'>" + homeFinal + " - " + awayFinal + "</td><td><a data-week='" + i + "' data-game='" + j + "' class='score' href='#scoreModal' data-toggle='modal'>Report Score</a></td></tr>");
+
+          }; // end for loop
 
         }; // end for loop
 
         // make week 1 tab active
         $("#schedule li:first-child").addClass("active");
-        $("#week1").addClass("active");  
+        $("#week1").addClass("active");
 
       }; // end if statment
 
     }; // end updateSchedule
 
-// ************************ delete team **************************
+// ********************** report score ************************
 
-    function deleteTeam() {
+    function reportScore(homeTeam, awayTeam, homeScore, awayScore) {
 
-      // click event on delete buttons
-      $(".delete").on("click", function() {
+      // send game data to server
+      $.ajax({
+        url: "/backliftapp/game",
+        type: "POST",
+        dataType: "JSON",
+        data: {
+        homeName: homeTeam.teamName,
+        awayName: awayTeam.teamName,
+        homeScore: homeScore,
+        awayScore: awayScore
+        },
+        success: function (data) {
 
-        // delete team data from server
+        // retrieve game data from server
         $.ajax({
-          url: "/backliftapp/team/" + league[$(this).attr("id")].id,
-          type: "DELETE",
+          url: "/backliftapp/game",
+          type: "GET",
           dataType: "JSON",
-          success: function () {
+          success: function (data) {
 
+            // update scores array
+            scores = data;
+
+            // update schedule table
+            updateSchedule();
+
+          }
+        }); // end GET
+
+        }
+      }); // end POST
+
+      // update wins and losses
+      updateRecord(homeTeam, awayTeam, homeScore, awayScore);
+
+    }; // end reportScore
+
+// ****************** update wins and losses ******************
+
+    function updateRecord(homeTeam, awayTeam, homeScore, awayScore) {
+
+
+      // determine winner and loser
+      if (+homeScore > +awayScore) {
+
+        // increment home team wins
+        $.ajax({
+          url: "/backliftapp/team/" + homeTeam.id,
+          type: "PUT",
+          dataType: "JSON",
+          data: {
+            wins: +homeTeam.wins + 1,
+          },
+          success: function (data) {
+
+          // increment away team losses
+          $.ajax({
+            url: "/backliftapp/team/" + awayTeam.id,
+            type: "PUT",
+            dataType: "JSON",
+            data: {
+              losses: +awayTeam.losses + 1,
+            },
+            success: function (data) {
+
+            // retrieve league data from server
             $.ajax({
-              url: '/backliftapp/team',
+              url: "/backliftapp/team",
               type: "GET",
               dataType: "JSON",
               success: function (data) {
@@ -188,27 +416,89 @@
                 // fill league array with data
                 league = data;
 
-                // clear the standings table
-                $("#standings tbody").html("");
-
                 // populate standings table
                 updateStandings();
 
-                // make delete buttons functional
-                deleteTeam();
-
-                // populate schedule table
-                updateSchedule();
+                // click event on delete buttons
+                $("#standings").on("click", ".delete", function() {
+                  var teamID = $(this).attr("id");
+                  deleteTeam(teamID);
+                });
 
               }
             }); // end GET
 
+            }
+          }); // end PUT
+
           }
-        }); // end DELETE
+        }); // end PUT
 
-      }); // end click
+      } else {
 
-    }; // end deleteTeam
+        // increment home team losses
+        $.ajax({
+          url: "/backliftapp/team/" + homeTeam.id,
+          type: "PUT",
+          dataType: "JSON",
+          data: {
+            losses: +homeTeam.losses + 1,
+          },
+          success: function (data) {
+
+          // increment away team wins
+          $.ajax({
+            url: "/backliftapp/team/" + awayTeam.id,
+            type: "PUT",
+            dataType: "JSON",
+            data: {
+              wins: +awayTeam.wins + 1,
+            },
+            success: function (data) {
+
+            // retrieve league data from server
+            $.ajax({
+              url: "/backliftapp/team",
+              type: "GET",
+              dataType: "JSON",
+              success: function (data) {
+
+                // fill league array with data
+                league = data;
+
+                // populate standings table
+                updateStandings();
+
+                // click event on delete buttons
+                $("#standings").on("click", ".delete", function() {
+                  var teamID = $(this).attr("id");
+                  deleteTeam(teamID);
+                });
+
+              }
+            }); // end GET
+
+            }
+          }); // end PUT
+
+          }
+        }); // end PUT
+
+      }; // end if statement
+
+      // clear score form inputs
+      $("#scoreForm input").val("");
+
+    }; // end updateRecord
+
+// **************** check if season can start *****************
+
+    // show start season button if enough teams
+    function startSeason() {
+      if (league.length >= minTeams) {
+        $("#startSeason").show();
+      }
+    };
 
 // ********************* form validation **********************
 
@@ -227,7 +517,7 @@
       <div class="container">
         <ul class="nav">
           <li><a href="#teamModal" data-toggle="modal">Create Team</a></li>
-          <li><a href="#scoreModal" data-toggle="modal">Report Score</a></li>
+          <li><a id="clearScores" href="#" >Clear Scores</a></li>
         </ul>
         <a id="title" class="brand pull-right" href="#">Beer League Baseball Challenge</a>
       </div>
@@ -292,6 +582,13 @@
 
     </div><!-- end .row-fluid -->
 
+    <!-- start season button -->
+    <div class="row-fluid">
+      <div id="startSeason" class="span12">
+        <button class="btn btn-primary btn-large" type="button">Start Season!</button>
+      </div>
+    </div>
+
     <!-- team form modal -->
     <div id="teamModal" class="modal hide fade">
       <div class="modal-header">
@@ -350,17 +647,13 @@
         <h3>Report Score</h3>
       </div>
       <div class="modal-body">
-        <form id="teamForm" class="form-horizontal">
-          <div class="control-group">
-            <label class="control-label" for="teamName">Team Name</label>
-            <div class="controls">
-              <input id="teamName" type="text" name="teamName" placeholder="Ex. Milwaukee Beers" />
-            </div>
-          </div>
+        <form id="scoreForm">
+          <h4 id="marquee"></h4>
+          <input id="homeScore" type="text" name="homeScore" />&mdash;<input id="awayScore" type="text" name="awayScore" />
         </form>
       </div>
       <div class="modal-footer">
-        <button id="createTeam" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
+        <button id="reportScore" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
       </div>
     </div><!-- end #scoreModal -->
 
