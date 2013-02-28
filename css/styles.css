@@ -26,6 +26,9 @@ td.name {
 th.record, td.record {
 	width: 50px;
 }
+h4.infoTitle {
+  margin: 0;
+}
 #scoreModal {
   width: 400px;
 }
