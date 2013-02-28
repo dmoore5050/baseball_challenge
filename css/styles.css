@@ -14,20 +14,32 @@ div#formAlert, div#startSeason {
 h3, h4 {
   text-align: center;
 }
-th.center, td.center {
-	text-align: center;
-}
-th.rank {
+th.rank, td.rank {
 	width: 40px;
+  text-align: right;
 }
-td.name {
+th.name, td.name {
 	width: 135px;
 }
 th.record, td.record {
 	width: 50px;
+  text-align: center;
+}
+th.deleteColumn, td.deleteColumn {
+  width: 46px;
 }
 h4.infoTitle {
   margin: 0;
+}
+th.teams, td.teams {
+  width: 135px;
+}
+th.final, td.final {
+  width: 75px;
+  text-align: center;
+}
+th.report, td.report {
+  width: 81px;
 }
 #scoreModal {
   width: 400px;
