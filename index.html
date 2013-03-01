@@ -94,15 +94,15 @@
 
 // ************ make report score links functional *************
 
-    // create empty team variables
-    var homeTeam, awayTeam;
+    // create empty variables
+    var homeTeam, awayTeam, week, game;
 
     // click event on report score links
     $(".tab-content").on("click", ".score", function() {
 
       // fill variables with schedule index values
-      var week = $(this).attr("data-week");
-      var game = $(this).attr("data-game");
+      week = $(this).attr("data-week");
+      game = $(this).attr("data-game");
 
       // fill variables with team objects
       if (league.length % 2 == 0) { // even number of teams
@@ -129,7 +129,7 @@
       var awayScore = $("#awayScore").val();
 
       // send game data to server
-      reportScore(homeTeam, awayTeam, homeScore, awayScore);
+      reportScore(homeTeam, awayTeam, homeScore, awayScore, week);
 
     }); // end click
 
@@ -279,12 +279,12 @@
 
 // ******************** update schedule *************************
 
-    function updateSchedule() {
+    function updateSchedule(activePane) {
 
       // determine schedule length
       if (league.length < minTeams) {
-          $("#schedule ul").html("<li class='active'><a href='#week1' data-toggle='tab'>Week 1</a></li>");
-          $("#schedule .tab-content").html("<div id='week1' class='tab-pane active'><table class='table table-striped'><thead><tr><th class='teams'>Teams</th><th class='final'>Final Score</th><th class='report'></th></tr></thead><tbody></tbody></table></div>");
+          $("#schedule ul").html("<li class='active'><a href='#pane0' data-toggle='tab'>Week 1</a></li>");
+          $("#schedule .tab-content").html("<div id='pane0' class='tab-pane active'><table class='table table-striped'><thead><tr><th class='teams'>Teams</th><th class='final'>Final Score</th><th class='report'></th></tr></thead><tbody></tbody></table></div>");
       } else if (league.length == 4) {
         schedule = sched4;
       } else if (league.length == 5 || league.length == 6) {
@@ -302,8 +302,8 @@
 
         // create tabs and panes
         for (var i = 0; i < schedule.length; i++) {
-          $("#schedule ul").append("<li><a href='#week" + (i + 1) + "' " + "data-toggle='tab'>Week " + (i + 1) + "</a></li>");
-          $("#schedule .tab-content").append("<div id='week" + (i + 1) + "' " + "class='tab-pane'><table class='table table-striped'><thead><tr><th class='teams'>Teams</th><th class='final'>Final Score</th><th class='report'></th></tr></thead><tbody></tbody></table></div>");
+          $("#schedule ul").append("<li id='tab" + i + "'><a href='#pane" + i + "' " + "data-toggle='tab'>Week " + (i + 1) + "</a></li>");
+          $("#schedule .tab-content").append("<div id='pane" + i + "' " + "class='tab-pane'><table class='table table-striped'><thead><tr><th class='teams'>Teams</th><th class='final'>Final Score</th><th class='report'></th></tr></thead><tbody></tbody></table></div>");
 
           // initialize counter and write bye weeks
           if (league.length % 2 == 0) { // even number of teams
@@ -312,7 +312,7 @@
             // Team 1 on the schedule becomes a ghost team,
             // and whichever team plays them has a bye week.
             var j = 1;
-            $("#week" + (i + 1) + " tbody").append("<tr><td class='teams'>" + league[schedule[i][0][1] - 2].teamName + "</td><td class='final'>Bye</td><td class='report'></td></tr>");
+            $("#pane" + i + " tbody").append("<tr><td class='teams'>" + league[schedule[i][0][1] - 2].teamName + "</td><td class='final'>Bye</td><td class='report'></td></tr>");
           }; // end if statement
 
           // populate schedule with game data
@@ -338,7 +338,7 @@
             };
 
             // write game data to panes
-            $("#week" + (i + 1) + " tbody").append("<tr><td class='teams'>" + home + " vs. " + away + "</td><td class='final'>" + homeFinal + " - " + awayFinal + "</td><td class='report'><a data-week='" + i + "' data-game='" + j + "' class='score' href='#scoreModal' data-toggle='modal'>Report Score</a></td></tr>");
+            $("#pane" + i + " tbody").append("<tr><td class='teams'>" + home + " vs. " + away + "</td><td class='final'>" + homeFinal + " - " + awayFinal + "</td><td class='report'><a data-week='" + i + "' data-game='" + j + "' class='score' href='#scoreModal' data-toggle='modal'>Report Score</a></td></tr>");
 
             // increment counter
             j++;
@@ -348,13 +348,13 @@
         }; // end for loop
 
         // set active pane
-        // if () { // maintain active pane
-        //   $("#schedule li:first-child").addClass("active");
-        //   $("#week1").addClass("active");
-        // } else { // make week 1 pane active
-          $("#schedule li:first-child").addClass("active");
-          $("#week1").addClass("active");
-        // };
+        if (activePane) { // maintain active pane
+          $("#tab" + activePane).addClass("active");
+          $("#pane" + activePane).addClass("active");
+        } else { // make week 1 pane active
+          $("#tab0").addClass("active");
+          $("#pane0").addClass("active");
+        };
 
       }; // end if statment
 
@@ -362,7 +362,7 @@
 
 // ********************** report score ************************
 
-    function reportScore(homeTeam, awayTeam, homeScore, awayScore) {
+    function reportScore(homeTeam, awayTeam, homeScore, awayScore, activePane) {
 
       // send game data to server
       $.ajax({
@@ -388,7 +388,7 @@
             scores = data;
 
             // update schedule table
-            updateSchedule();
+            updateSchedule(activePane);
 
           }
         }); // end GET
@@ -593,11 +593,11 @@
         <div class="tabbable tabs-left">
           <!-- default tab -->
           <ul class="nav nav-tabs">
-            <li class="active"><a href="#week1" data-toggle="tab">Week 1</a></li>
+            <li id="tab0" class="active"><a href="#pane0" data-toggle="tab">Week 1</a></li>
           </ul>
           <div class="tab-content">
             <!-- default pane -->
-            <div id="week1" class="tab-pane active">
+            <div id="pane0" class="tab-pane active">
               <table class="table table-striped">
                 <thead>
                   <tr>
