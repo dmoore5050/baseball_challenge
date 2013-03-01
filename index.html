@@ -94,7 +94,7 @@
 
 // ************ make report score links functional *************
 
-    // create empty team name variables
+    // create empty team variables
     var homeTeam, awayTeam;
 
     // click event on report score links
@@ -305,67 +305,56 @@
           $("#schedule ul").append("<li><a href='#week" + (i + 1) + "' " + "data-toggle='tab'>Week " + (i + 1) + "</a></li>");
           $("#schedule .tab-content").append("<div id='week" + (i + 1) + "' " + "class='tab-pane'><table class='table table-striped'><thead><tr><th class='teams'>Teams</th><th class='final'>Final Score</th><th class='report'></th></tr></thead><tbody></tbody></table></div>");
 
-          // determine if league has even number of teams
-          if (league.length % 2 == 0) {
-
-            // populate schedule with game data
-            for (j = 0; j < schedule[i].length; j++) {
-              
-              // fill variables with initial values
-              var home = league[schedule[i][j][0] - 1].teamName;
-              var away = league[schedule[i][j][1] - 1].teamName;
-              var homeFinal = 0;
-              var awayFinal = 0;
-
-              // find correct scores in scores array
-              for (var k = 0; k < scores.length; k++) {
-                if (scores[k].homeName == home && scores[k].awayName == away) {
-                  homeFinal = scores[k].homeScore;
-                  awayFinal = scores[k].awayScore;
-                }
-              };
-
-              // write game data to panes
-              $("#week" + (i + 1) + " tbody").append("<tr><td class='teams'>" + home + " vs. " + away + "</td><td class='final'>" + homeFinal + " - " + awayFinal + "</td><td class='report'><a data-week='" + i + "' data-game='" + j + "' class='score' href='#scoreModal' data-toggle='modal'>Report Score</a></td></tr>");
-
-            }; // end for loop
-
-          } else {
-          // Team 1 on the schedule becomes a ghost team,
-          // and whichever team plays them has a bye week.
-
-            // write bye weeks to panes
+          // initialize counter and write bye weeks
+          if (league.length % 2 == 0) { // even number of teams
+            var j = 0;
+          } else { // odd number of teams
+            // Team 1 on the schedule becomes a ghost team,
+            // and whichever team plays them has a bye week.
+            var j = 1;
             $("#week" + (i + 1) + " tbody").append("<tr><td class='teams'>" + league[schedule[i][0][1] - 2].teamName + "</td><td class='final'>Bye</td><td class='report'></td></tr>");
+          }; // end if statement
 
-            // populate schedule with game data
-            for (j = 1; j < schedule[i].length; j++) {
-              
-              // fill variables with initial values
+          // populate schedule with game data
+          while (j < schedule[i].length) {
+            
+            // fill variables with initial values
+            if (league.length % 2 == 0) { // even number of teams
+              var home = league[schedule[i][j][0] - 1].teamName;
+              var away = league[schedule[i][j][1] - 1].teamName;                
+            } else { // odd number of teams
               var home = league[schedule[i][j][0] - 2].teamName;
               var away = league[schedule[i][j][1] - 2].teamName;
-              var homeFinal = 0;
-              var awayFinal = 0;
+            };
+            var homeFinal = 0;
+            var awayFinal = 0;
 
-              // find correct scores in scores array
-              for (var k = 0; k < scores.length; k++) {
-                if (scores[k].homeName == home && scores[k].awayName == away) {
-                  homeFinal = scores[k].homeScore;
-                  awayFinal = scores[k].awayScore;
-                }
+            // find correct scores in scores array
+            for (var k = 0; k < scores.length; k++) {
+              if (scores[k].homeName == home && scores[k].awayName == away) {
+                homeFinal = scores[k].homeScore;
+                awayFinal = scores[k].awayScore;
               };
+            };
 
-              // write game data to panes
-              $("#week" + (i + 1) + " tbody").append("<tr><td class='teams'>" + home + " vs. " + away + "</td><td class='final'>" + homeFinal + " - " + awayFinal + "</td><td class='report'><a data-week='" + i + "' data-game='" + j + "' class='score' href='#scoreModal' data-toggle='modal'>Report Score</a></td></tr>");
+            // write game data to panes
+            $("#week" + (i + 1) + " tbody").append("<tr><td class='teams'>" + home + " vs. " + away + "</td><td class='final'>" + homeFinal + " - " + awayFinal + "</td><td class='report'><a data-week='" + i + "' data-game='" + j + "' class='score' href='#scoreModal' data-toggle='modal'>Report Score</a></td></tr>");
 
-            }; // end for loop
+            // increment counter
+            j++;
 
-          }; // end if statement
+          }; // end while loop
 
         }; // end for loop
 
-        // make week 1 tab active
-        $("#schedule li:first-child").addClass("active");
-        $("#week1").addClass("active");
+        // set active pane
+        // if () { // maintain active pane
+        //   $("#schedule li:first-child").addClass("active");
+        //   $("#week1").addClass("active");
+        // } else { // make week 1 pane active
+          $("#schedule li:first-child").addClass("active");
+          $("#week1").addClass("active");
+        // };
 
       }; // end if statment
 
