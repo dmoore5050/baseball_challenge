@@ -216,18 +216,45 @@
 
     function updateStandings() {
 
+      // create empty array
+      var sort = new Array();
+
+      // fill array with league data
+      for (var i = 0; i < league.length; i++) {
+        sort.push(league[i]);
+      };
+
+      // sort array by win percentage using bubble sort
+      for (var j = 0; j < (sort.length - 1); j++) {
+        var swapping = false;
+        for (var k = 0; k < ((sort.length - 1) - j); k++) {
+          if (sort[k].percentage < sort[k + 1].percentage) {
+            var temp = sort[k];
+            sort[k] = sort[k + 1];
+            sort[k + 1] = temp;
+            swapping = true;
+          };
+        };
+        if (!swapping) {
+        break;
+        };
+      };
+
       // clear standings table
       $("#standings tbody").html("");
 
       // populate standings table
-      for (var i = 0; i < league.length; i++) {
+      for (var l = 0; l < sort.length; l++) {
 
         // fill variables with popover content
-        var popoverTitle = "<h4 class=\"infoTitle\">" + league[i].teamName + "</h4>";
-        var popoverContent = "<b>Manager:</b> " + league[i].firstName + " " + league[i].lastName + "<br /><b>Phone Number:</b> " + league[i].phone + "<br /><b>Team Sponsor:</b> " + league[i].sponsor + "<br /><b>Zip Code:</b> " + league[i].zip;
+        var popoverTitle = "<h4 class=\"infoTitle\">" + sort[l].teamName + "</h4>";
+        var popoverContent = "<b>Manager:</b> " + sort[l].firstName + " " + sort[l].lastName + "<br /><b>Phone Number:</b> " + sort[l].phone + "<br /><b>Team Sponsor:</b> " + sort[l].sponsor + "<br /><b>Zip Code:</b> " + sort[l].zip;
+
+        // format win percentage
+        var winPercentage = Number(sort[l].percentage).toFixed(3);
 
         // write data to standings table
-        $("#standings tbody").append("<tr><th class='rank'>" + (i + 1) + ".</th><td class='name'><a class='teamInfo' href='#' title='" + popoverTitle + "' data-content='" + popoverContent + "'>" + league[i].teamName + "</a></td><td class='record'>" + league[i].wins + "</td><td class='record'>" + league[i].losses + "</td><td class='record'>" + league[i].percentage + "</td><td class='deleteColumn'><button id='" + league[i].id + "' class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>");
+        $("#standings tbody").append("<tr><th class='rank'>" + (l + 1) + ".</th><td class='name'><a class='teamInfo' href='#' title='" + popoverTitle + "' data-content='" + popoverContent + "'>" + sort[l].teamName + "</a></td><td class='record'>" + sort[l].wins + "</td><td class='record'>" + sort[l].losses + "</td><td class='record'>" + winPercentage + "</td><td class='deleteColumn'><button id='" + sort[l].id + "' class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>");
 
       }; // end for loop
 
@@ -416,6 +443,7 @@
           dataType: "JSON",
           data: {
             wins: +homeTeam.wins + 1,
+            percentage: (+homeTeam.wins + 1) / (+homeTeam.wins + 1 + +homeTeam.losses)
           },
           success: function (data) {
 
@@ -426,6 +454,7 @@
             dataType: "JSON",
             data: {
               losses: +awayTeam.losses + 1,
+              percentage: (+awayTeam.wins) / (+awayTeam.wins + +awayTeam.losses + 1)
             },
             success: function (data) {
 
@@ -466,6 +495,7 @@
           dataType: "JSON",
           data: {
             losses: +homeTeam.losses + 1,
+            percentage: (+homeTeam.wins) / (+homeTeam.wins + +homeTeam.losses + 1)
           },
           success: function (data) {
 
@@ -476,6 +506,7 @@
             dataType: "JSON",
             data: {
               wins: +awayTeam.wins + 1,
+              percentage: (+awayTeam.wins + 1) / (+awayTeam.wins + 1 + +awayTeam.losses)
             },
             success: function (data) {
 
