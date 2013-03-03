@@ -4,12 +4,22 @@ div.container {
 a#title {
   float: right;
 }
+a#launchTeamModal {
+  display: none;
+  color: #0088cc;
+}
+a#launchTeamModal:hover {
+  color: #005580;
+}
 div#mainContent {
   margin-top: 40px;
 }
-div#formAlert, div#startSeason {
+div#maxTeamsAlert, div#createTeamAlert, div#startSeason {
   display: none;
   text-align: center;
+}
+span#maxTeams, span#minTeams {
+  font-weight: bold;
 }
 h3, h4 {
   text-align: center;
@@ -21,6 +31,12 @@ th.rank, td.rank {
 th.name, td.name {
 	width: 135px;
 }
+a.teamInfo:hover {
+  text-decoration: none;
+}
+h4.infoTitle {
+  margin: 0;
+}
 th.record, td.record {
 	width: 50px;
   text-align: center;
@@ -28,8 +44,8 @@ th.record, td.record {
 th.deleteColumn, td.deleteColumn {
   width: 46px;
 }
-h4.infoTitle {
-  margin: 0;
+button.delete {
+  display: none;
 }
 th.teams, td.teams {
   width: 135px;
@@ -40,6 +56,9 @@ th.final, td.final {
 }
 th.report, td.report {
   width: 82px;
+}
+a.score {
+  display: none;
 }
 #scoreModal {
   width: 400px;
@@ -62,4 +81,7 @@ span#awayTeam {
 #scoreForm input {
   width: 25px;
   margin: 0 20px;
+}
+div#seasonModal, div#resetModal {
+  text-align: center;
 }
