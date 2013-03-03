@@ -30,20 +30,31 @@
 
     loadPage();
 
-// ****************** max team alert message ********************
+// ****************** max teams alert message *******************
 
-    // show alert message if too many teams
-    $("a[href='#teamModal']").click(function() {
+    // click event on create team link
+    $("a[href='#teamModal']").on("click", function() {
+
+      // show alert message if too many teams
       if (league.length == maxTeams) {
-        $("#formAlert").show();
+        $("#maxTeamsAlert").show();
         return false;
       };
-    });
+
+    }); // end click
+
+    // insert maximum teams into alert
+    $("#maxTeams").text(maxTeams);
 
     // hide alert when dismissed
     $("#alertClose").click(function() {
-      $("#formAlert").hide();
+      $("#maxTeamsAlert").hide();
     });
+
+// **************** create teams alert message *****************
+
+    // insert minimum teams into alert
+    $("#minTeams").text(minTeams);
 
 // ********************* create new team ***********************
 
@@ -83,6 +94,9 @@
           // update schedule table
           updateSchedule();
 
+          // hide create team alert
+          $("#createTeamAlert").hide();
+
           // check if season can start
           startSeason();
 
@@ -104,8 +118,8 @@
           url: "/backliftapp/game/" + scores[i].id,
           type: "DELETE",
           dataType: "JSON"
-        }); // end DELETE
-      }; // end for loop
+        });
+      };
 
       // delete all league data from server
       for (var i = 0; i < league.length; i ++) {
@@ -113,8 +127,8 @@
           url: "/backliftapp/team/" + league[i].id,
           type: "DELETE",
           dataType: "JSON"
-        }); // end DELETE
-      }; // end for loop
+        });
+      };
 
       // update lock status on server
       $.ajax({
@@ -126,9 +140,9 @@
         },
         success: function (data) {
 
-        // restore game and league data
-        loadPage();
-        
+          // restore game and league data
+          loadPage();
+
         }
       }); // end PUT
 
@@ -186,10 +200,13 @@
 // *********************** start season ************************
 
     // click event on start season button
-    $("#startSeason button").click(function() {
+    $("#seasonSubmit").click(function() {
 
       // hide start season button
-      $(this).hide();
+      $("#startSeason").hide();
+
+      // show create team link
+      $("#launchTeamModal").hide();
 
       // hide delete buttons
       $(".delete").hide();
@@ -255,6 +272,11 @@
 
               // populate schedule table
               updateSchedule();
+
+              // show create team alert if league is empty
+              if (league.length == 0) {
+                $("#createTeamAlert").show();
+              };
 
               // check if season can start
               startSeason();
@@ -594,12 +616,17 @@
           // determine if season is in progress
           if (data.lock == "N") {
 
+            // show create team link
+            $("#launchTeamModal").css("display", "block");
+
             // show delete buttons
             $(".delete").show();
 
             // show start season button if enough teams
             if (league.length >= minTeams) {
               $("#startSeason").show();
+            } else {
+              $("#startSeason").hide();
             };
 
           } else {
@@ -630,8 +657,8 @@
     <div class="navbar-inner">
       <div class="container">
         <ul class="nav">
-          <li><a href="#teamModal" data-toggle="modal">Create Team</a></li>
-          <li><a id="resetSeason" href="#" >Reset Season</a></li>
+          <li><a id="launchTeamModal" class="disabled" href="#teamModal" data-toggle="modal">Create Team</a></li>
+          <li><a href="#resetModal" data-toggle="modal">Reset Season</a></li>
         </ul>
         <a id="title" class="brand pull-right" href="#">Beer League Baseball Challenge</a>
       </div>
@@ -640,11 +667,11 @@
 
   <div id="mainContent" class="container">
 
-    <!-- alert message -->
+    <!-- max teams alert message -->
     <div class="row-fluid">
-      <div id="formAlert" class="alert alert-error span12">
+      <div id="maxTeamsAlert" class="alert alert-error span12">
         <button id="alertClose" class="close" type="button">&times;</button>
-        Sorry, this league already has 8 teams!
+        Sorry, this league already has <span id="maxTeams"></span> teams!
       </div>
     </div>
 
@@ -698,10 +725,17 @@
 
     </div><!-- end .row-fluid -->
 
+    <!-- create team alert message -->
+    <div class="row-fluid">
+      <div id="createTeamAlert" class="alert alert-success span12">
+        You need at least <span id="minTeams"></span> teams to start a season.  Click the 'Create Team' button to get started!
+      </div>
+    </div>
+
     <!-- start season button -->
     <div class="row-fluid">
       <div id="startSeason" class="span12">
-        <button class="btn btn-primary btn-large" type="button">Start Season!</button>
+        <a class="btn btn-primary btn-large" href="#seasonModal" data-toggle="modal">Start Season!</a>
       </div>
     </div>
 
@@ -753,6 +787,7 @@
       </div>
       <div class="modal-footer">
         <button id="createTeam" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
       </div>
     </div><!-- end #teamModal -->
 
@@ -770,8 +805,31 @@
       </div>
       <div class="modal-footer">
         <button id="reportScore" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
       </div>
     </div><!-- end #scoreModal -->
+
+    <!-- start season modal -->
+    <div id="seasonModal" class="modal hide fade">
+      <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4>Are you ready to start the season?</h4>
+        <p class="text-error">You will not be able to edit any team information<br />once the season begins.</p>
+        <button id="seasonSubmit" class="btn btn-primary" data-dismiss="modal">Yes, I'm ready.</button>
+        <button class="btn" data-dismiss="modal" aria-hidden="true">No, not yet.</button>
+      </div>
+    </div><!-- end #seasonModal -->
+
+    <!-- reset season modal -->
+    <div id="resetModal" class="modal hide fade">
+      <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4>Are you sure you want to reset the season?</h4>
+        <p class="text-error">This will erase any teams you have created,<br />as well as any scores you have reported.</p>
+        <button id="resetSeason" class="btn btn-primary" data-dismiss="modal">Yes, I'm sure.</button>
+        <button class="btn" data-dismiss="modal" aria-hidden="true">No way, man!</button>
+      </div>
+    </div><!-- end #resetModal -->
 
   </div><!-- end .container -->
 </body>
