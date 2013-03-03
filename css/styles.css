@@ -28,6 +28,9 @@ th.record, td.record {
 th.deleteColumn, td.deleteColumn {
   width: 46px;
 }
+button.delete {
+  display: none;
+}
 h4.infoTitle {
   margin: 0;
 }
@@ -40,6 +43,9 @@ th.final, td.final {
 }
 th.report, td.report {
   width: 82px;
+}
+a.score {
+  display: none;
 }
 #scoreModal {
   width: 400px;
