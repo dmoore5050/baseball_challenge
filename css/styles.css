@@ -60,10 +60,13 @@ th.report, td.report {
 a.score {
   display: none;
 }
-#scoreModal {
+div.formInfoAlert {
+  text-align: center;
+}
+div#scoreModal {
   width: 400px;
 }
-#scoreForm {
+form#scoreForm {
   text-align: center;
 }
 span#homeTeam {
@@ -78,10 +81,17 @@ span#awayTeam {
   display: inline-block;
   text-align: left;
 }
-#scoreForm input {
+form#scoreForm input {
   width: 25px;
-  margin: 0 20px;
+  margin: 0 25px;
 }
-div#seasonModal, div#resetModal {
+div#resetModal, div#seasonModal {
   text-align: center;
+}
+.validatr-error {
+    padding: 2px 6px;
+    border: 1px solid #eed3d7;
+    border-radius: 4px;
+    background-color: #f2dede;
+    color: #b94a48;
 }

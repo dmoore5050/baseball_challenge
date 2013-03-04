@@ -12,6 +12,7 @@
   <!-- js files -->
   <script src="js/jquery-1.9.1.min.js"></script>
   <script src="js/bootstrap.min.js"></script>
+  <script src="js/validatr.min.js"></script>
   <script src="js/schedule.js"></script>
 
   <script type="text/javascript">
@@ -32,19 +33,20 @@
 
 // ****************** max teams alert message *******************
 
+    // insert maximum teams into alert
+    $("#maxTeams").text(maxTeams);
+
     // click event on create team link
     $("a[href='#teamModal']").on("click", function() {
 
       // show alert message if too many teams
       if (league.length == maxTeams) {
         $("#maxTeamsAlert").show();
-        return false;
+      } else {
+        $("#teamModal").modal("show");        
       };
 
     }); // end click
-
-    // insert maximum teams into alert
-    $("#maxTeams").text(maxTeams);
 
     // hide alert when dismissed
     $("#alertClose").click(function() {
@@ -56,10 +58,47 @@
     // insert minimum teams into alert
     $("#minTeams").text(minTeams);
 
+// ******************** initialize popovers ********************
+
+    // standings table team information
+    $("#standings").popover({
+      selector: ".teamInfo",
+      html: true,
+      placement: "right",
+      trigger: "hover"
+    });
+
+    // create team form instructions
+    $("#teamForm input").popover({
+      placement: "bottom",
+      trigger: "hover"
+    });
+
+// **************** initialize form validation ****************
+
+    // create team form validation
+    $("#teamForm").validatr({
+      showall: true,
+      template: "<div>Please try again.</div>"
+    });
+
+    // report score form validation
+    $("#scoreForm").validatr({
+      showall: true,
+      template: "<div>&times;</div>"
+    });
+
 // ********************* create new team ***********************
 
     // click event on team form submit button
     $("#createTeam").click(function() {
+
+      // stop function if form is invalid
+      if ($.validatr.validateForm(teamForm) == false) {
+        return;
+      } else {
+        $("#teamModal").modal("hide");
+      };
 
       // send team data to server
       $.ajax({
@@ -106,6 +145,9 @@
       // clear team form inputs
       $("#teamForm input").val("");
 
+      // prevent form submission
+      return false;
+
     }); // end click
 
 // *********************** reset season ************************
@@ -148,15 +190,6 @@
 
     }); // end click
 
-// ******************** initialize popover ********************
-
-    $("#standings").popover({
-      selector: ".teamInfo",
-      html: true,
-      placement: "right",
-      trigger: "hover"
-    });
-
 // ************ make report score links functional *************
 
     // create empty variables
@@ -188,12 +221,22 @@
     // click event on score form submit button
     $("#reportScore").click(function() {
 
+      // stop function if form is invalid
+      if ($.validatr.validateForm(scoreForm) == false) {
+        return;
+      } else {
+        $("#scoreModal").modal("hide");
+      };
+
       // fill variables with scores
       var homeScore = $("#homeScore").val();
       var awayScore = $("#awayScore").val();
 
       // send game data to server
       reportScore(homeTeam, awayTeam, homeScore, awayScore, week);
+
+      // prevent form submission
+      return false;
 
     }); // end click
 
@@ -205,7 +248,7 @@
       // hide start season button
       $("#startSeason").hide();
 
-      // show create team link
+      // hide create team link
       $("#launchTeamModal").hide();
 
       // hide delete buttons
@@ -641,11 +684,7 @@
 
     }; // end startSeason
 
-// ********************* form validation **********************
-
-    // enter form validation here
-
-
+// ************************ end script ************************
 
   }); // end ready
   </script>
@@ -657,7 +696,7 @@
     <div class="navbar-inner">
       <div class="container">
         <ul class="nav">
-          <li><a id="launchTeamModal" class="disabled" href="#teamModal" data-toggle="modal">Create Team</a></li>
+          <li><a id="launchTeamModal" href="#teamModal">Create Team</a></li>
           <li><a href="#resetModal" data-toggle="modal">Reset Season</a></li>
         </ul>
         <a id="title" class="brand pull-right" href="#">Beer League Baseball Challenge</a>
@@ -746,47 +785,50 @@
         <h3>Team Information</h3>
       </div>
       <div class="modal-body">
+        <div class="alert alert-info formInfoAlert">
+          Hover over the input fields for instructions.
+        </div>
         <form id="teamForm" class="form-horizontal">
           <div class="control-group">
             <label class="control-label" for="teamName">Team Name</label>
             <div class="controls">
-              <input id="teamName" type="text" name="teamName" placeholder="Ex. Milwaukee Beers" />
+              <input id="teamName" type="text" name="teamName" placeholder="Ex. Milwaukee Beers" required="required" data-content="Enter your team name." maxlength="25" />
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="firstName">Manager's First Name</label>
             <div class="controls">
-              <input id="firstName" type="text" name="firstName" placeholder="Ex. Joe" />
+              <input id="firstName" type="text" name="firstName" placeholder="Ex. Joe" required="required" data-content="Enter your manager's first name." maxlength="25" />
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="lastName">Manager's Last Name</label>
             <div class="controls">
-              <input id="lastName" type="text" name="lastName" placeholder="Ex. Cooper" />
+              <input id="lastName" type="text" name="lastName" placeholder="Ex. Cooper" required="required" data-content="Enter your manager's last name." maxlength="25" />
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="phone">Phone Number</label>
             <div class="controls">
-              <input id="phone" type="text" name="phone" placeholder="Ex. 555-555-BEER" />
+              <input id="phone" type="tel" name="phone" placeholder="Ex. 555-555-BEER" required="required" data-content="Enter a 10-digit US phone number." maxlength="14" pattern="\(?(\d{3})\)?[ -.](\d{3})[ -.](\d{4})" />
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="sponsor">Team Sponsor</label>
             <div class="controls">
-              <input id="sponsor" type="text" name="sponsor" placeholder="Ex. Milwaukee's Best" />
+              <input id="sponsor" type="text" name="sponsor" placeholder="Ex. Milwaukee's Best" required="required" data-content="Enter the name of your team sponsor." maxlength="25" />
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="zip">Zip Code</label>
             <div class="controls">
-              <input id="zip" type="text" name="zip" placeholder="Ex. 53201" />
+              <input id="zip" type="text" name="zip" placeholder="Ex. 53201" required="required" data-content="Enter a 5 or 9-digit US zip code." pattern="\d{5}(-\d{4})?" maxlength="10" />
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button id="createTeam" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
+        <button id="createTeam" class="btn btn-primary" type="submit" aria-hidden="true" form="teamForm">Submit</button>
         <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
       </div>
     </div><!-- end #teamModal -->
@@ -798,13 +840,16 @@
         <h3>Report Score</h3>
       </div>
       <div class="modal-body">
+        <div class="alert alert-info formInfoAlert">
+          Click on the input fields to enter scores.
+        </div>
         <form id="scoreForm">
           <h4 id="marquee"></h4>
-          <input id="homeScore" type="text" name="homeScore" />&mdash;<input id="awayScore" type="text" name="awayScore" />
+          <input id="homeScore" type="text" name="homeScore" required="required" maxlength="3" pattern="\d{1,3}" />&mdash;<input id="awayScore" type="text" name="awayScore" required="required" maxlength="3" pattern="\d{1,3}" />
         </form>
       </div>
       <div class="modal-footer">
-        <button id="reportScore" class="btn btn-primary" type="submit" data-dismiss="modal" aria-hidden="true">Submit</button>
+        <button id="reportScore" class="btn btn-primary" type="submit" aria-hidden="true" form="scoreForm">Submit</button>
         <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
       </div>
     </div><!-- end #scoreModal -->
@@ -815,7 +860,7 @@
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4>Are you ready to start the season?</h4>
         <p class="text-error">You will not be able to edit any team information<br />once the season begins.</p>
-        <button id="seasonSubmit" class="btn btn-primary" data-dismiss="modal">Yes, I'm ready.</button>
+        <button id="seasonSubmit" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Yes, I'm ready.</button>
         <button class="btn" data-dismiss="modal" aria-hidden="true">No, not yet.</button>
       </div>
     </div><!-- end #seasonModal -->
@@ -826,7 +871,7 @@
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4>Are you sure you want to reset the season?</h4>
         <p class="text-error">This will erase any teams you have created,<br />as well as any scores you have reported.</p>
-        <button id="resetSeason" class="btn btn-primary" data-dismiss="modal">Yes, I'm sure.</button>
+        <button id="resetSeason" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Yes, I'm sure.</button>
         <button class="btn" data-dismiss="modal" aria-hidden="true">No way, man!</button>
       </div>
     </div><!-- end #resetModal -->
