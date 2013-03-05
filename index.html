@@ -93,7 +93,7 @@
     // click event on team form submit button
     $("#createTeam").click(function() {
 
-      // stop function if form is invalid
+      // exit function if form is invalid
       if ($.validatr.validateForm(teamForm) == false) {
         return;
       } else {
@@ -145,13 +145,14 @@
       // clear team form inputs
       $("#teamForm input").val("");
 
-      // prevent form submission
+      // clear form validation errors
       return false;
 
     }); // end click
 
 // *********************** reset season ************************
 
+    // click event on reset season link
     $("#resetSeason").click(function() {
 
       // delete all game data from server
@@ -221,21 +222,28 @@
     // click event on score form submit button
     $("#reportScore").click(function() {
 
-      // stop function if form is invalid
+      // exit function if form is invalid
       if ($.validatr.validateForm(scoreForm) == false) {
         return;
-      } else {
-        $("#scoreModal").modal("hide");
       };
 
       // fill variables with scores
       var homeScore = $("#homeScore").val();
       var awayScore = $("#awayScore").val();
 
+      // show alert message if scores are equal
+      if (homeScore == awayScore) {
+        $("#tieErrorAlert").show();
+        return false;
+      } else {
+        $("#tieErrorAlert").hide();
+        $("#scoreModal").modal("hide");
+      };
+
       // send game data to server
       reportScore(homeTeam, awayTeam, homeScore, awayScore, week);
 
-      // prevent form submission
+      // clear form validation errors
       return false;
 
     }); // end click
@@ -264,13 +272,19 @@
         dataType: "JSON",
         data: {
           lock: "Y"
-        },
-        success: function (data) {
-          console.log(data);
         }
       }); // end PUT
 
     }); // end click
+
+// ********************* animate baseball *********************
+
+    $("#logo").hover(function() {
+        $(this).stop().animate({top: 8}, 100);
+      },function() {
+        $(this).stop().animate({top: 3}, 75);
+      }
+    );
 
 // *********** load page with game and league data *************
 // Game data is retrieved before league data so that scores will
@@ -288,9 +302,6 @@
           // fill scores array with data
           scores = data;
 
-          // confirm contents of scores array
-          console.log(scores);
-
           // retrieve league data from server
           $.ajax({
             url: "/backliftapp/team",
@@ -300,9 +311,6 @@
 
               // fill league array with data
               league = data;
-
-              // confirm contents of league array
-              console.log(league);
 
               // populate standings table
               updateStandings();
@@ -412,6 +420,11 @@
 
               // update schedule table
               updateSchedule();
+
+              // show create team alert if league is empty
+              if (league.length == 0) {
+                $("#createTeamAlert").show();
+              };
 
               // check if season can start
               startSeason();
@@ -694,15 +707,6 @@
 
     }; // end startSeason
 
-// ********************* animate baseball *********************
-
-    $("#logo").hover(function() {
-        $(this).stop().animate({top: 8}, 100);
-      },function() {
-        $(this).stop().animate({top: 3}, 75);
-      }
-    );
-
 // ************************ end script ************************
 
   }); // end ready
@@ -869,6 +873,9 @@
           <h4 id="marquee"></h4>
           <input id="homeScore" type="text" name="homeScore" required="required" maxlength="3" pattern="\d{1,3}" />&mdash;<input id="awayScore" type="text" name="awayScore" required="required" maxlength="3" pattern="\d{1,3}" />
         </form>
+        <div id="tieErrorAlert" class="alert alert-error">
+          There are no ties in Beer League!
+        </div>
       </div>
       <div class="modal-footer">
         <button id="reportScore" class="btn btn-primary" type="submit" aria-hidden="true" form="scoreForm">Submit</button>

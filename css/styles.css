@@ -1,3 +1,6 @@
+body {
+  background-image: url("../img/grass.jpg");
+}
 div.container {
   max-width: 960px;
 }
@@ -12,7 +15,10 @@ a#launchTeamModal:hover {
   color: #005580;
 }
 div#mainContent {
+  padding-bottom: 20px;
   position: relative;
+  border-radius: 0 0 10px 10px;
+  background-color: rgba(255, 255, 255, .9);
 }
 img#logo {
   width: 100px;
@@ -24,7 +30,7 @@ img#logo {
 div#tableRow {
   margin-top: 40px;
 }
-div#maxTeamsAlert, div#createTeamAlert, div#startSeason {
+div#maxTeamsAlert, div#createTeamAlert, div#tieErrorAlert, div#startSeason {
   display: none;
   text-align: center;
 }
