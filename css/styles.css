@@ -1,3 +1,6 @@
+body {
+  background-image: url("../img/grass.jpg");
+}
 div.container {
   max-width: 960px;
 }
@@ -12,9 +15,22 @@ a#launchTeamModal:hover {
   color: #005580;
 }
 div#mainContent {
+  padding-bottom: 20px;
+  position: relative;
+  border-radius: 0 0 10px 10px;
+  background-color: rgba(255, 255, 255, .9);
+}
+img#logo {
+  width: 100px;
+  position: absolute;
+  top: 3px;
+  left: 400px;
+  z-index: 1030;
+}
+div#tableRow {
   margin-top: 40px;
 }
-div#maxTeamsAlert, div#createTeamAlert, div#startSeason {
+div#maxTeamsAlert, div#createTeamAlert, div#tieErrorAlert, div#startSeason {
   display: none;
   text-align: center;
 }
@@ -60,10 +76,17 @@ th.report, td.report {
 a.score {
   display: none;
 }
-#scoreModal {
-  width: 400px;
+div#teamModal {
+  z-index: 9999;
 }
-#scoreForm {
+div.formInfoAlert {
+  text-align: center;
+}
+div#scoreModal {
+  width: 400px;
+  z-index: 9999;
+}
+form#scoreForm {
   text-align: center;
 }
 span#homeTeam {
@@ -78,10 +101,18 @@ span#awayTeam {
   display: inline-block;
   text-align: left;
 }
-#scoreForm input {
+form#scoreForm input {
   width: 25px;
-  margin: 0 20px;
+  margin: 0 25px;
 }
-div#seasonModal, div#resetModal {
+div#resetModal, div#seasonModal {
   text-align: center;
+  z-index: 9999;
+}
+.validatr-error {
+  padding: 2px 6px;
+  border: 1px solid #eed3d7;
+  border-radius: 4px;
+  background-color: #f2dede;
+  color: #b94a48;
 }
