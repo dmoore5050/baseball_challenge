@@ -12,6 +12,16 @@ a#launchTeamModal:hover {
   color: #005580;
 }
 div#mainContent {
+  position: relative;
+}
+img#logo {
+  width: 100px;
+  position: absolute;
+  top: 3px;
+  left: 400px;
+  z-index: 1030;
+}
+div#tableRow {
   margin-top: 40px;
 }
 div#maxTeamsAlert, div#createTeamAlert, div#startSeason {
@@ -60,11 +70,15 @@ th.report, td.report {
 a.score {
   display: none;
 }
+div#teamModal {
+  z-index: 9999;
+}
 div.formInfoAlert {
   text-align: center;
 }
 div#scoreModal {
   width: 400px;
+  z-index: 9999;
 }
 form#scoreForm {
   text-align: center;
@@ -87,11 +101,12 @@ form#scoreForm input {
 }
 div#resetModal, div#seasonModal {
   text-align: center;
+  z-index: 9999;
 }
 .validatr-error {
-    padding: 2px 6px;
-    border: 1px solid #eed3d7;
-    border-radius: 4px;
-    background-color: #f2dede;
-    color: #b94a48;
+  padding: 2px 6px;
+  border: 1px solid #eed3d7;
+  border-radius: 4px;
+  background-color: #f2dede;
+  color: #b94a48;
 }
