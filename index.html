@@ -531,7 +531,12 @@
           updateSchedule(activePane);
 
           // show report score links
-          $(".score").show();
+          $("td.final").each(function() {
+            var contents = $(this).text();
+            if (contents == "0 - 0") {
+              $(this).next(".report").children(".score").show();
+            };
+          });
 
         }
       }); // end POST
@@ -675,7 +680,12 @@
           } else {
 
             // show report score links
-            $(".score").show();
+            $("td.final").each(function() {
+              var contents = $(this).text();
+              if (contents == "0 - 0") {
+                $(this).next(".report").children(".score").show();
+              };
+            });
 
           }; // end if statement
 
