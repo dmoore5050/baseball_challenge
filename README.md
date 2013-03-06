@@ -10,10 +10,10 @@ Our app has met the following project requirements:
 
 Phase 1:<br />
 
+*use the Bootstrap framework
+*set a minimum of 4 teams
+*set a maximum of 8 teams
 <ul>
-  <li>use the Bootstrap framework</li>
-  <li>set a minimum of 4 teams</li>
-  <li>set a maximum of 8 teams</li>
   <li>allow users to create teams</li>
   <li>collect the following team contact information:
     <ul>
