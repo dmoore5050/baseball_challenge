@@ -46,7 +46,7 @@ Additional technical information:<br />
   <li>our JavaScript is divided into two major sections:
     <ol>
       <li>the first half is script that runs on page load, affecting elements that already exist in the DOM; there are instances, though, where we use the jQuery .on() method to assign events to elements not yet present in the DOM</li>
-      <li>the second half is comprised of functions, which are referenced in either the first half of the script or in other functions</li>
+      <li>the second half is comprised of functions, which are referenced in either the first half of the script or in other functions; these functions perform various actions, such as adding or removing objects from the server and updating page content</li>
     </ol>
   <li>we tried to maintain an intuitive naming convention where variables are nouns, functions contain verbs, etc.</li>
   <li>we have dedicated functions that refresh our standings and schedule tables, respectively</li>
