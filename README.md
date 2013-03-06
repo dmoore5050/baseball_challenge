@@ -30,8 +30,11 @@ Phase 1:<br />
 </ul>
 
 Phase 2:<br />
--use pre-defined schedules for varying league sizes<br />
--allow users to submit scores<br />
--store scores on the server and display them in the schedule table<br />
--update team wins and losses on the server and display them in the standings table<br />
--sort the league standings by win percentage<br />
+
+<ul>
+  <li>use pre-defined schedules for varying league sizes</li>
+  <li>allow users to submit scores</li>
+  <li>store scores on the server and display them in the schedule table</li>
+  <li>update team wins and losses on the server and display them in the standings table</li>
+  <li>sort the league standings by win percentage</li>
+</ul>
