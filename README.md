@@ -9,7 +9,6 @@ https://baseballchallenge-e5qs2.backliftapp.com/
 Our app has met the following project requirements:
 
 Phase 1:<br />
-
 <ul>
   <li>use the Bootstrap framework</li>
   <li>set a minimum of 4 teams</li>
@@ -30,7 +29,6 @@ Phase 1:<br />
 </ul>
 
 Phase 2:<br />
-
 <ul>
   <li>use pre-defined schedules for varying league sizes</li>
   <li>allow users to submit scores</li>
