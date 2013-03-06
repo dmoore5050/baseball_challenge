@@ -3,6 +3,9 @@ baseball_challenge
 
 This is a group coding project for the Nashville Software School.  Our assignment is to create a one-page app that stores and displays information for a baseball league.
 
+Our app can be viewed live at:<br />
+https://baseballchallenge-e5qs2.backliftapp.com/
+
 Our app has met the following project requirements:
 
 Phase 1:<br />
