@@ -42,10 +42,10 @@ Phase 2:<br />
 Additional technical information:<br />
 
 <ul>
-  <li>the bulk of our HTML is made up of form modals that are not displayed on page load; most of the page content is generated dynamically as users create teams</li>
+  <li>the bulk of our HTML is a series of form modals that are not displayed on page load; the rest is made up of empty elements that are dynamically injected with content as users create teams</li>
   <li>our JavaScript is divided into two major sections:
     <ol>
-      <li>the first half is script that runs on page load, affecting elements that already exist in the DOM; there are instances, however, where we use the jQuery .on() method to assign events to elements not yet present in the DOM</li>
+      <li>the first half is script that runs on page load, affecting elements that already exist in the DOM; there are instances, though, where we use the jQuery .on() method to assign events to elements not yet present in the DOM</li>
       <li>the second half is comprised of functions, which are referenced in either the first half of the script or in other functions</li>
     </ol>
   <li>we tried to maintain an intuitive naming convention where variables are nouns, functions contain verbs, etc.</li>
