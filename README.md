@@ -9,6 +9,7 @@ https://baseballchallenge-e5qs2.backliftapp.com/
 Our app has met the following project requirements:
 
 Phase 1:<br />
+
 <ul>
   <li>use the Bootstrap framework</li>
   <li>set a minimum of 4 teams</li>
@@ -29,6 +30,7 @@ Phase 1:<br />
 </ul>
 
 Phase 2:<br />
+
 <ul>
   <li>use pre-defined schedules for varying league sizes</li>
   <li>allow users to submit scores</li>
@@ -36,3 +38,18 @@ Phase 2:<br />
   <li>update team wins and losses on the server and display them in the standings table</li>
   <li>sort the league standings by win percentage</li>
 </ul>
+
+Additional technical information:<br />
+
+<ul>
+  <li>the bulk of our HTML is for form modals that are not displayed on page load; most of the page content is generated dynamically as users create teams</li>
+  <li>our JavaScript can be divided into two major sections:
+    <ol>
+      <li>the first half is script that runs on page load, affecting elements that already exist in the DOM; there are instances, however, where we use the jQuery .on() method to assign events to elements not yet present in the DOM<li>
+      <li>the second half is comprised of functions, which are referenced in either the first half of the script or in other functions</li>
+    </ol>
+  <li>we used an intuitive naming convention; variables are nouns, functions contain verbs, etc.<li>
+  <li>we have dedicated functions that refresh our standings and schedule tables, respectively</li>
+  <li>we attempted to structure the script in order in which elements are loaded into the DOM; when no logical ordering was apparent, we placed the sections in order of which items users would interact with first<li>
+  <li>
+<ul>
