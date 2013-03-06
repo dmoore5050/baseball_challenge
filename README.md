@@ -42,7 +42,7 @@ Phase 2:<br />
 Additional technical information:<br />
 
 <ul>
-  <li>the bulk of our HTML is for form modals that are not displayed on page load; most of the page content is generated dynamically as users create teams</li>
+  <li>the bulk of our HTML is made up of form modals that are not displayed on page load; most of the page content is generated dynamically as users create teams</li>
   <li>our JavaScript can be divided into two major sections:
     <ol>
       <li>the first half is script that runs on page load, affecting elements that already exist in the DOM; there are instances, however, where we use the jQuery .on() method to assign events to elements not yet present in the DOM</li>
