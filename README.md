@@ -50,5 +50,5 @@ Additional technical information:<br />
     </ol>
   <li>we used an intuitive naming convention; variables are nouns, functions contain verbs, etc.<li>
   <li>we have dedicated functions that refresh our standings and schedule tables, respectively</li>
-  <li>we attempted to structure the script in order in which elements are loaded into the DOM; when no logical ordering was apparent, we placed the sections in order of which items users would interact with first</li>
+  <li>we attempted to structure our script by the order in which elements are loaded into the DOM; when no logical ordering was apparent, we ordered the sections by which elements users would interact with first</li>
 </ul>
