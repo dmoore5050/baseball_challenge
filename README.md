@@ -9,19 +9,25 @@ https://baseballchallenge-e5qs2.backliftapp.com/
 Our app has met the following project requirements:
 
 Phase 1:<br />
--use the Bootstrap framework<br />
--set a minimum of 4 teams<br />
--set a maximum of 8 teams<br />
--allow users to create teams<br />
--collect the following team contact information:<br />
-  -team name<br />
-  -manager's first name<br />
-  -manager's last name<br />
-  -phone number<br />
-  -sponsor<br />
-  -zip code<br />
--save team information to the server using Ajax and JSON<br />
--display team details when users hover over team names in the standings table<br />
+
+<ul>
+  <li>use the Bootstrap framework</li>
+  <li>set a minimum of 4 teams</li>
+  <li>set a maximum of 8 teams</li>
+  <li>allow users to create teams</li>
+  <li>collect the following team contact information:
+    <ul>
+      <li>team name</li>
+      <li>manager's first name</li>
+      <li>manager's last name</li>
+      <li>phone number</li>
+      <li>sponsor</li>
+      <li>zip code</li>
+    </ul>
+  </li>
+  <li>save team information to the server using Ajax and JSON</li>
+  <li>display team details when users hover over team names in the standings table</li>
+</ul>
 
 Phase 2:<br />
 -use pre-defined schedules for varying league sizes<br />
