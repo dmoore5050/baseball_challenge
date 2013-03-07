@@ -152,7 +152,7 @@
 
 // *************** clear create team on close ******************
 
-  $("#close_createTeam").click(function() {
+  $(".reset_createTeam").click(function() {
       //clears form fields on close
       $('.team_inputs').each(function(){
         $(this).val('');
@@ -165,14 +165,7 @@
     // click event on reset season link
     $("#resetSeason").click(function() {
 
-      // delete all game data from server
-      for (var i = 0; i < scores.length; i ++) {
-        $.ajax({
-          url: "/backliftapp/game/" + scores[i].id,
-          type: "DELETE",
-          dataType: "JSON"
-        });
-      };
+      wipeGame();
 
       // delete all league data from server
       for (var i = 0; i < league.length; i ++) {
@@ -183,21 +176,7 @@
         });
       };
 
-      // update lock status on server
-      $.ajax({
-        url: "/backliftapp/season/cc55261d-117a-4efc-99ff-bb81e80bab43",
-        type: "PUT",
-        dataType: "JSON",
-        data: {
-          lock: "N"
-        },
-        success: function (data) {
-
-          // restore game and league data
-          loadPage();
-
-        }
-      }); // end PUT
+      resetSeasonLock();
 
     }); // end click
 
@@ -449,7 +428,12 @@
 
 // ******************** update schedule *************************
 
+//pseudo -- initialize counter var; every time a game is added to schedule, +1 to counter. when resultsdata.length == counter, show hidden modal and run modified reset season function.
+
     function updateSchedule(activePane) {
+
+      var gamesCounter = 0;
+      var leader = [];
 
       // determine schedule length
       if (league.length < minTeams) {
@@ -510,8 +494,10 @@
             // write game data to panes
             $("#pane" + i + " tbody").append("<tr><td class='teams'>" + home + " vs. " + away + "</td><td class='final'>" + homeFinal + " - " + awayFinal + "</td><td class='report'><a class='score' data-week='" + i + "' data-game='" + j + "' href='#scoreModal' data-toggle='modal'>Report Score</a></td></tr>");
 
-            // increment counter
+            // increment while loop counter
             j++;
+            // increment end check counter
+            gamesCounter++;
 
           }; // end while loop
 
@@ -527,6 +513,44 @@
         };
 
       }; // end if statment
+  
+      $.ajax({
+        url: "/backliftapp/game",
+        type: "GET",
+        dataType: "JSON",
+        success: function (data) {
+          if (gamesCounter == data.length && data.length != 0) {
+            $.ajax({
+              url: "/backliftapp/team",
+              type: "GET",
+              dataType: "JSON",
+              success: function (data) {
+                var mostWins;
+                mostWins = 0;
+                $.each(data, function(index){
+                  if(data[index].wins > mostWins) { //If team wins are greater than wins stored in mostWins var...
+                    mostWins = data[index].wins; 
+                    if (leader.length == 0) { //& leader is empty, push teamName to leader.
+                      leader.push(data[index].teamName);
+                    }
+                    else { //& leader isn't empty, delete previous name and replace with new name.
+                      leader.splice(0, leader.length); 
+                      leader.push(data[index].teamName);
+                    }
+                  } 
+                  else if (data[index].wins == mostWins) { //If team wins are equal to number in array, push name to leader.
+                    leader.push( data[index].teamName );
+                  }
+                });
+                writePennant(leader);
+                $('#pennantModal').modal('show'); 
+                pennantRestart(); //wipes games and results, sets w/l's to 0
+              }
+            });
+          }
+        }
+      });
+
 
     }; // end updateSchedule
 
@@ -717,6 +741,87 @@
 
     }; // end startSeason
 
+// *********************** restart season (pennant) ************************
+
+  function pennantRestart () {
+
+    wipeGame();
+
+    // set team wins/losses to 0
+    for (var i = 0; i < league.length; i ++) {
+      $.ajax({
+        url: "/backliftapp/team/" + league[i].id,
+        type: "PUT",
+        dataType: "JSON",
+        data: { 
+          wins: 0,
+          losses: 0,
+          percentage: 0
+        },
+      });
+    };
+
+    resetSeasonLock();
+
+  };
+
+// ********************** write pennant announcement *************************
+
+function writePennant (leader) {
+
+  $('#winnerAnnouncement').html('');
+
+  if (leader.length == 1 ) {
+    $( '<h3>' + leader[0] + ' has won the pennant!</h3>').appendTo( '#winnerAnnouncement' );
+  }
+  else if (leader.length == 2) {
+    $( '<h3>' + leader[0] + ' & ' + leader[1] + ' have won the pennant!</h3>').appendTo( '#winnerAnnouncement' );
+  }
+  else {
+    var winnerList = leader[0] + ', ';
+    for ( var i = 1; i < leader.length - 1; i++ ) {
+      if (leader.length != 0) {
+        winnerList = winnerList + leader[i] + ', '; 
+      }
+    };
+    lastWinner = '& ' + leader[leader.length -1];
+    $( '<h3>' + winnerList + lastWinner + ' have won the pennant!</h3>').appendTo( '#winnerAnnouncement' );
+  }
+};
+
+
+// *************** server wipe & reset win/loss functions *******************
+
+  function wipeGame () {
+    // delete all game data from server
+    for (var i = 0; i < scores.length; i ++) {
+      $.ajax({
+        url: "/backliftapp/game/" + scores[i].id,
+        type: "DELETE",
+        dataType: "JSON"
+      });
+    };
+  };
+
+  function resetSeasonLock () {
+
+      // update lock status on server
+      $.ajax({
+        url: "/backliftapp/season/cc55261d-117a-4efc-99ff-bb81e80bab43",
+        type: "PUT",
+        dataType: "JSON",
+        data: {
+          lock: "N"
+        },
+        success: function (data) {
+
+          // restore game and league data
+          loadPage();
+
+        }
+      }); // end PUT
+    };
+
 // ************************ end script ************************
 
   }); // end ready
@@ -817,7 +922,7 @@
     <!-- team form modal -->
     <div id="teamModal" class="modal hide fade">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <button type="button" class="close reset_createTeam" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h3>Team Information</h3>
       </div>
       <div class="modal-body">
@@ -865,7 +970,8 @@
       </div>
       <div class="modal-footer">
         <button id="createTeam" class="btn btn-primary" type="submit" aria-hidden="true" form="teamForm">Submit</button>
-        <button id="close_createTeam" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        <button class="btn reset_createTeam">Reset Form</button>
+        <button class="btn reset_createTeam" data-dismiss="modal" aria-hidden="true">Close</button>
       </div>
     </div><!-- end #teamModal -->
 
@@ -914,6 +1020,21 @@
         <button class="btn" data-dismiss="modal" aria-hidden="true">No way, man!</button>
       </div>
     </div><!-- end #resetModal -->
+
+    <!-- pennant winner modal -->
+
+    <div id="pennantModal" class="modal hide fade">
+      <div class="modal-header">
+        <h3>-The season has ended-</h3>
+      </div>
+      <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <div id="winnerAnnouncement" style="test-align: center;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      </div>
+    </div>  <!-- end pennant winner modal -->
 
   </div><!-- end .container -->
 </body>
