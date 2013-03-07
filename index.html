@@ -150,6 +150,16 @@
 
     }); // end click
 
+// *************** clear create team on close ******************
+
+  $("#close_createTeam").click(function() {
+      //clears form fields on close
+      $('.team_inputs').each(function(){
+        $(this).val('');
+      });   
+      $('.validatr-message').remove();
+  });
+
 // *********************** reset season ************************
 
     // click event on reset season link
@@ -818,44 +828,44 @@
           <div class="control-group">
             <label class="control-label" for="teamName">Team Name</label>
             <div class="controls">
-              <input id="teamName" type="text" name="teamName" placeholder="Ex. Milwaukee Beers" required="required" data-content="Enter your team name." maxlength="25" />
+              <input id="teamName" type="text" class="team_inputs" name="teamName" placeholder="Ex. Milwaukee Beers" required="required" data-content="Enter your team name." maxlength="25" />
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="firstName">Manager's First Name</label>
             <div class="controls">
-              <input id="firstName" type="text" name="firstName" placeholder="Ex. Joe" required="required" data-content="Enter your manager's first name." maxlength="25" />
+              <input id="firstName" type="text" class="team_inputs" name="firstName" placeholder="Ex. Joe" required="required" data-content="Enter your manager's first name." maxlength="25" />
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="lastName">Manager's Last Name</label>
             <div class="controls">
-              <input id="lastName" type="text" name="lastName" placeholder="Ex. Cooper" required="required" data-content="Enter your manager's last name." maxlength="25" />
+              <input id="lastName" type="text" class="team_inputs" name="lastName" placeholder="Ex. Cooper" required="required" data-content="Enter your manager's last name." maxlength="25" />
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="phone">Phone Number</label>
             <div class="controls">
-              <input id="phone" type="tel" name="phone" placeholder="Ex. 555-555-BEER" required="required" data-content="Enter a 10-digit US phone number." maxlength="14" pattern="\(?(\d{3})\)?[ -.](\d{3})[ -.](\d{4})" />
+              <input id="phone" type="tel" class="team_inputs" name="phone" placeholder="Ex. 555-555-BEER" required="required" data-content="Enter a 10-digit US phone number." maxlength="14" pattern="\(?(\d{3})\)?[ -.](\d{3})[ -.](\d{4})" />
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="sponsor">Team Sponsor</label>
             <div class="controls">
-              <input id="sponsor" type="text" name="sponsor" placeholder="Ex. Milwaukee's Best" required="required" data-content="Enter the name of your team sponsor." maxlength="25" />
+              <input id="sponsor" type="text" class="team_inputs" name="sponsor" placeholder="Ex. Milwaukee's Best" required="required" data-content="Enter the name of your team sponsor." maxlength="25" />
             </div>
           </div>
           <div class="control-group">
             <label class="control-label" for="zip">Zip Code</label>
             <div class="controls">
-              <input id="zip" type="text" name="zip" placeholder="Ex. 53201" required="required" data-content="Enter a 5 or 9-digit US zip code." pattern="\d{5}(-\d{4})?" maxlength="10" />
+              <input id="zip" type="text" class="team_inputs" name="zip" placeholder="Ex. 53201" required="required" data-content="Enter a 5 or 9-digit US zip code." pattern="\d{5}(-\d{4})?" maxlength="10" />
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button id="createTeam" class="btn btn-primary" type="submit" aria-hidden="true" form="teamForm">Submit</button>
-        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        <button id="close_createTeam" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
       </div>
     </div><!-- end #teamModal -->
 
