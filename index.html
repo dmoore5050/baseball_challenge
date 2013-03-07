@@ -432,9 +432,6 @@
 
     function updateSchedule(activePane) {
 
-      var gamesCounter = 0;
-      var leader = [];
-
       // determine schedule length
       if (league.length < minTeams) {
           $("#schedule ul").html("<li class='active'><a href='#pane0' data-toggle='tab'>Week 1</a></li>");
@@ -513,46 +510,107 @@
         };
 
       }; // end if statment
+
+      var gamesCounter = 0; //counts total games in a given season
+      var leader = []; //array to be filled with team names of standings winner(s)
   
       $.ajax({
         url: "/backliftapp/game",
         type: "GET",
         dataType: "JSON",
         success: function (data) {
-          if (gamesCounter == data.length && data.length != 0) {
+
+          if (gamesCounter == data.length && data.length != 0) { //if games counter equals length of results array
+
             $.ajax({
-              url: "/backliftapp/team",
+              url: "/backliftapp/team", 
               type: "GET",
               dataType: "JSON",
               success: function (data) {
-                var mostWins;
-                mostWins = 0;
-                $.each(data, function(index){
-                  if(data[index].wins > mostWins) { //If team wins are greater than wins stored in mostWins var...
-                    mostWins = data[index].wins; 
-                    if (leader.length == 0) { //& leader is empty, push teamName to leader.
-                      leader.push(data[index].teamName);
-                    }
-                    else { //& leader isn't empty, delete previous name and replace with new name.
-                      leader.splice(0, leader.length); 
-                      leader.push(data[index].teamName);
-                    }
-                  } 
-                  else if (data[index].wins == mostWins) { //If team wins are equal to number in array, push name to leader.
-                    leader.push( data[index].teamName );
-                  }
-                });
+
+                getLeader();
                 writePennant(leader);
                 $('#pennantModal').modal('show'); 
                 pennantRestart(); //wipes games and results, sets w/l's to 0
-              }
-            });
-          }
-        }
-      });
 
+              }
+            }); //end team list GET
+
+          } // end if statement
+        }
+      }); //end game results GET
 
     }; // end updateSchedule
+
+ // ********************** determines league winner ************************   
+
+    function getLeader() {
+      var mostWins;
+      mostWins = 0;
+      $.each(data, function(index){
+        if(data[index].wins > mostWins) { //If team wins are greater than wins stored in mostWins var...
+          mostWins = data[index].wins; 
+          if (leader.length == 0) { //& leader is empty, push teamName to leader.
+            leader.push(data[index].teamName);
+          }
+          else { //& leader isn't empty, delete previous name and replace with new name.
+            leader.splice(0, leader.length); 
+            leader.push(data[index].teamName);
+          }
+        } 
+        else if (data[index].wins == mostWins) { //If team wins are equal to number in array, push name to leader.
+          leader.push( data[index].teamName );
+        }
+      }); //end loop
+    };
+
+// ********************** write pennant announcement *************************
+
+function writePennant (leader) {
+
+  $('#winnerAnnouncement').html('');
+
+  if (leader.length == 1 ) {
+    $( '<h3>' + leader[0] + ' has won the pennant!</h3>').appendTo( '#winnerAnnouncement' );
+  }
+  else if (leader.length == 2) {
+    $( '<h3>' + leader[0] + ' & ' + leader[1] + ' have won the pennant!</h3>').appendTo( '#winnerAnnouncement' );
+  }
+  else {
+    var winnerList = leader[0] + ', ';
+    for ( var i = 1; i < leader.length - 1; i++ ) {
+      if (leader.length != 0) {
+        winnerList = winnerList + leader[i] + ', '; 
+      }
+    };
+    lastWinner = '& ' + leader[leader.length -1];
+    $( '<h3>' + winnerList + lastWinner + ' have won the pennant!</h3>').appendTo( '#winnerAnnouncement' );
+  }
+};
+
+// *********************** restart season (pennant) ************************
+
+  function pennantRestart () {
+
+    wipeGame(); //wipes game results collection
+
+    // set team wins/losses to 0
+    for (var i = 0; i < league.length; i ++) {
+      $.ajax({
+        url: "/backliftapp/team/" + league[i].id,
+        type: "PUT",
+        dataType: "JSON",
+        data: { 
+          wins: 0,
+          losses: 0,
+          percentage: 0
+        }
+      });
+    }; //end for loop
+
+    resetSeasonLock(); //erases start season trigger
+
+  }; // end pennant restart func
 
 // ********************** report score ************************
 
@@ -741,58 +799,10 @@
 
     }; // end startSeason
 
-// *********************** restart season (pennant) ************************
-
-  function pennantRestart () {
-
-    wipeGame();
-
-    // set team wins/losses to 0
-    for (var i = 0; i < league.length; i ++) {
-      $.ajax({
-        url: "/backliftapp/team/" + league[i].id,
-        type: "PUT",
-        dataType: "JSON",
-        data: { 
-          wins: 0,
-          losses: 0,
-          percentage: 0
-        },
-      });
-    };
-
-    resetSeasonLock();
-
-  };
-
-// ********************** write pennant announcement *************************
-
-function writePennant (leader) {
-
-  $('#winnerAnnouncement').html('');
-
-  if (leader.length == 1 ) {
-    $( '<h3>' + leader[0] + ' has won the pennant!</h3>').appendTo( '#winnerAnnouncement' );
-  }
-  else if (leader.length == 2) {
-    $( '<h3>' + leader[0] + ' & ' + leader[1] + ' have won the pennant!</h3>').appendTo( '#winnerAnnouncement' );
-  }
-  else {
-    var winnerList = leader[0] + ', ';
-    for ( var i = 1; i < leader.length - 1; i++ ) {
-      if (leader.length != 0) {
-        winnerList = winnerList + leader[i] + ', '; 
-      }
-    };
-    lastWinner = '& ' + leader[leader.length -1];
-    $( '<h3>' + winnerList + lastWinner + ' have won the pennant!</h3>').appendTo( '#winnerAnnouncement' );
-  }
-};
-
-
 // *************** server wipe & reset win/loss functions *******************
 
   function wipeGame () {
+
     // delete all game data from server
     for (var i = 0; i < scores.length; i ++) {
       $.ajax({
