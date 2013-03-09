@@ -161,13 +161,13 @@
 
 // *************** clear create team on close ******************
 
-  $( ".reset_createTeam" ).click(function() {
-      //clears form fields on close
-      $( ".team_inputs" ).each(function() {
-        $( this ).val( "" );
-      });   
-      $( ".validatr-message" ).remove();
-  });
+    $( ".reset_createTeam" ).click(function() {
+        //clears form fields on close
+        $( ".team_inputs" ).each(function() {
+          $( this ).val( "" );
+        });   
+        $( ".validatr-message" ).remove();
+    });
 
 // *********************** reset season ************************
 
@@ -351,54 +351,89 @@
 
       // fill array with league data
 
-      var team, 
-        length = league.length;
+      fillSortArray( sort );
 
-      for ( team = 0; team < length; team++ ) {
+      var sortLength = sort.length;
+
+      sortStandings( sort, sortLength );
+
+      printStandings( sort, sortLength );
+
+    }; // end updateStandings
+
+// *************************** fill sort array *****************************  
+
+    function  fillSortArray( sort ) {
+      var team, 
+        leagueLength = league.length;
+
+      for ( team = 0; team < leagueLength; team++ ) {
         sort.push(league[team]);
       };
+    };
 
-      var j, k, sortLength = sort.length;
+// *************************** sort standings table *****************************   
 
-      // sort array by win percentage using bubble sort
-      for ( j = 0; j < ( sortLength - 1 ); j++ ) {
-        var swapping = false;
-        for ( k = 0; k < (( sortLength - 1 ) - j ); k++ ) {
-          if (sort[ k ].percentage < sort[ k + 1 ].percentage ) {
-            var temp = sort[ k ];
-            sort[ k ] = sort[ k + 1 ];
-            sort[ k + 1 ] = temp;
-            swapping = true;
+    function sortStandings( sort, sortLength ) {
+
+        var j, k;
+
+        for ( j = 0; j < ( sortLength - 1 ); j++ ) {
+          var swapping;
+          swapping = false;
+          for ( k = 0; k < (( sortLength - 1 ) - j ); k++ ) {
+            if (sort[ k ].percentage < sort[ k + 1 ].percentage ) {
+              var temp = sort[ k ];
+              sort[ k ] = sort[ k + 1 ];
+              sort[ k + 1 ] = temp;
+              swapping = true;
+            };
+          };
+          if ( !swapping ) {
+          break;
           };
         };
-        if ( !swapping ) {
-        break;
-        };
+
       };
 
-      // clear standings table
+// *************************** print standings table *****************************   
+
+    function printStandings( sort, sortLength ) {
+
       $( "#standings tbody" ).html( "" );
 
       var sortedTeam;
 
-      // populate standings table
       for ( sortedTeam = 0; sortedTeam < sortLength; sortedTeam++ ) {
-
-        // fill variables with popover content
-        var popoverTitle = "<h4 class=\"infoTitle\">" + sort[ sortedTeam ].teamName + "</h4>";
-        var popoverContent = "<b>Manager:</b> " + sort[ sortedTeam ].firstName + " " + sort[ sortedTeam ].lastName + "<br /><b>Phone Number:</b> " + sort[ sortedTeam ].phone + "<br /><b>Team Sponsor:</b> " + sort[ sortedTeam ].sponsor + "<br /><b>Zip Code:</b> " + sort[ sortedTeam ].zip;
-
-        // format win percentage
-        var winPercentage = Number( sort[ sortedTeam ].percentage ).toFixed( 3 );
-
-        // write data to standings table
-        $( "#standings tbody" ).append( "<tr><th class='rank'>" + ( sortedTeam + 1 ) + ".</th><td class='name'><a class='teamInfo' href='#' title='" + popoverTitle + "' data-content='" + popoverContent + "'>" + sort[ sortedTeam ].teamName + "</a></td><td class='record'>" + sort[ sortedTeam ].wins + "</td><td class='record'>" + sort[ sortedTeam ].losses + "</td><td class='record'>" + winPercentage + "</td><td class='deleteColumn'><button id='" + sort[ sortedTeam ].id + "' class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>" );
-
+        initializeStandingsRow( sort, sortedTeam );
       }; // end for loop
 
-    }; // end updateStandings
+    };
 
-// ************************ delete team **************************
+// *************************** creates standings rows *****************************
+
+    function initializeStandingsRow ( sort, sortedTeam ) {
+
+      var popoverTitle, 
+        popoverContent, 
+        winPercentage;
+
+      popoverTitle = "<h4 class=\"infoTitle\">" + sort[ sortedTeam ].teamName + "</h4>";
+      popoverContent = "<b>Manager:</b> " + sort[ sortedTeam ].firstName + " " + sort[ sortedTeam ].lastName + "<br /><b>Phone Number:</b> " + sort[ sortedTeam ].phone + "<br /><b>Team Sponsor:</b> " + sort[ sortedTeam ].sponsor + "<br /><b>Zip Code:</b> " + sort[ sortedTeam ].zip;
+     
+      winPercentage = Number( sort[ sortedTeam ].percentage ).toFixed( 3 );
+
+      writeStandingsRow( sort, sortedTeam, popoverTitle, popoverContent, winPercentage );
+
+    };
+
+// ************************ writes row in standings table **************************
+
+    function writeStandingsRow( sort, sortedTeam, popoverTitle, popoverContent, winPercentage ) {
+      $( "#standings tbody" ).append( "<tr><th class='rank'>" + ( sortedTeam + 1 ) + ".</th><td class='name'><a class='teamInfo' href='#' title='" + popoverTitle + "' data-content='" + popoverContent + "'>" + sort[ sortedTeam ].teamName + "</a></td><td class='record'>" + sort[ sortedTeam ].wins + "</td><td class='record'>" + sort[ sortedTeam ].losses + "</td><td class='record'>" + winPercentage + "</td><td class='deleteColumn'><button id='" + sort[ sortedTeam ].id + "' class='btn btn-danger btn-mini delete' type='button'>Delete</button></td></tr>" );
+    };
+
+// ***************************** delete team *******************************
 
     function deleteTeam( teamID ) {
 
@@ -447,186 +482,183 @@
 
 // ******************** update schedule *************************
    
-  function updateSchedule( activePane ) {
+    function updateSchedule( activePane ) {
 
-    var leagueLength = league.length, game;
+      var leagueLength = league.length, game;
 
-    if ( leagueLength < 4 ) {
-      $( "#schedule ul" ).html( "<li class='active'><a href='#pane0' data-toggle='tab'>Week 1</a></li>" );
-      $( "#schedule .tab-content" ).html( "<div id='pane0' class='tab-pane active'><table class='table table-striped'><thead><tr><th class='teams'>Teams</th><th class='final'>Final Score</th><th class='report'></th></tr></thead><tbody></tbody></table></div>");
-    } else if ( leagueLength == 4 ) {
-      schedule = sched4;
-    } else if ( leagueLength == 5 || leagueLength == 6 ) {
-      schedule = sched6;
-    } else if ( leagueLength == 7 || leagueLength == 8 ) {
-      schedule = sched8;
+      if ( leagueLength < 4 ) {
+        $( "#schedule ul" ).html( "<li class='active'><a href='#pane0' data-toggle='tab'>Week 1</a></li>" );
+        $( "#schedule .tab-content" ).html( "<div id='pane0' class='tab-pane active'><table class='table table-striped'><thead><tr><th class='teams'>Teams</th><th class='final'>Final Score</th><th class='report'></th></tr></thead><tbody></tbody></table></div>");
+      } else if ( leagueLength == 4 ) {
+        schedule = sched4;
+      } else if ( leagueLength == 5 || leagueLength == 6 ) {
+        schedule = sched6;
+      } else if ( leagueLength == 7 || leagueLength == 8 ) {
+        schedule = sched8;
+      };
+
+      // verify league has enough teams
+      if ( leagueLength >= 4 ) {
+
+        // clear schedule table
+        $( "#schedule ul" ).html( "" );
+        $( "#schedule .tab-content" ).html( "" );
+
+        writeSchedule( scores, leagueLength, league, schedule );
+        setPane( activePane );    
+
+      };
+
+      declareWinners( leagueLength );
+
     };
-
-
-    // verify league has enough teams
-    if ( leagueLength >= 4 ) {
-
-      // clear schedule table
-      $( "#schedule ul" ).html( "" );
-      $( "#schedule .tab-content" ).html( "" );
-
-      writeSchedule( scores, leagueLength, league, schedule );
-      setPane( activePane );    
-
-    };
-
-    declareWinners( leagueLength );
-
-  };
 
 // ************************ write schedule ************************** 
 
-  function writeSchedule( scores, leagueLength, league, schedule ){
+    function writeSchedule( scores, leagueLength, league, schedule ){
 
-    var week, 
-      schedLength = schedule.length;
-    // create tabs and panes
-    for ( week = 0; week < schedLength; week++ ) {
-      $( "#schedule ul" ).append( "<li id='tab" + week + "'><a href='#pane" + week + "' " + "data-toggle='tab'>Week " + ( week + 1 ) + "</a></li>" );
-      $( "#schedule .tab-content" ).append( "<div id='pane" + week + "' " + "class='tab-pane'><table class='table table-striped'><thead><tr><th class='teams'>Teams</th><th class='final'>Final Score</th><th class='report'></th></tr></thead><tbody></tbody></table></div>" );
+      var week, 
+        schedLength = schedule.length;
+      // create tabs and panes
+      for ( week = 0; week < schedLength; week++ ) {
+        $( "#schedule ul" ).append( "<li id='tab" + week + "'><a href='#pane" + week + "' " + "data-toggle='tab'>Week " + ( week + 1 ) + "</a></li>" );
+        $( "#schedule .tab-content" ).append( "<div id='pane" + week + "' " + "class='tab-pane'><table class='table table-striped'><thead><tr><th class='teams'>Teams</th><th class='final'>Final Score</th><th class='report'></th></tr></thead><tbody></tbody></table></div>" );
 
-      initializeSchedule ( scores, leagueLength, league, schedule, week, game );
+        initializeSchedule ( scores, leagueLength, league, schedule, week, game );
 
 
-    }; // end for loop
-  };
+      }; // end for loop
+    };
 
 // ********************* initializes schedule ************************ 
 
-  function initializeSchedule ( scores, leagueLength, league, schedule, week ) {
+    function initializeSchedule ( scores, leagueLength, league, schedule, week ) {
 
-    var game;
+      var game;
 
-    if ( leagueLength % 2 == 0 ) { // even number of teams
-      game = 0;
-    } else { // odd number of teams
-      // Team 1 on the schedule becomes a ghost team,
-      // and whichever team plays them has a bye week.
-      game = 1;
-      $( "#pane" + week + " tbody" ).append( "<tr><td class='teams'>" + league[ schedule[ week ][ 0 ][ 1 ] - 2 ].teamName + "</td><td class='final'>Bye</td><td class='report'></td></tr>" );
-    }; // end if statement
+      if ( leagueLength % 2 == 0 ) { // even number of teams
+        game = 0;
+      } else { // odd number of teams
+        // Team 1 on the schedule becomes a ghost team,
+        // and whichever team plays them has a bye week.
+        game = 1;
+        $( "#pane" + week + " tbody" ).append( "<tr><td class='teams'>" + league[ schedule[ week ][ 0 ][ 1 ] - 2 ].teamName + "</td><td class='final'>Bye</td><td class='report'></td></tr>" );
+      }; // end if statement
 
-    populateSchedule( scores, leagueLength, schedule, week, game );
-  };
+      populateSchedule( scores, leagueLength, schedule, week, game );
+    };
 
 // ******************** populate schedule  ********************** 
 
-  function populateSchedule( scores, leagueLength, schedule, week, game ) {
+    function populateSchedule( scores, leagueLength, schedule, week, game ) {
 
-    while ( game < schedule[ week ].length ) {
-      
-      // fill variables with initial values
-      if ( leagueLength % 2 == 0 ) { // even number of teams
-        var home = league[ schedule[ week ][ game ][ 0 ] - 1 ].teamName;
-        var away = league[ schedule[ week ][ game ][ 1 ] - 1 ].teamName;                
-      } else { // odd number of teams
-        var home = league[ schedule[ week ][ game ][ 0 ] - 2 ].teamName;
-        var away = league[ schedule[ week ][ game ][ 1 ] - 2 ].teamName;
-      };
+      while ( game < schedule[ week ].length ) {
+        
+        // fill variables with initial values
+        if ( leagueLength % 2 == 0 ) { // even number of teams
+          var home = league[ schedule[ week ][ game ][ 0 ] - 1 ].teamName;
+          var away = league[ schedule[ week ][ game ][ 1 ] - 1 ].teamName;                
+        } else { // odd number of teams
+          var home = league[ schedule[ week ][ game ][ 0 ] - 2 ].teamName;
+          var away = league[ schedule[ week ][ game ][ 1 ] - 2 ].teamName;
+        };
 
-        console.log(game);
+        scoreFind( scores, week, game, home, away );
 
-      scoreFind( scores, week, game, home, away );
+        game++;
 
-      game++;
-
-    }; // end while loop
-  };
+      }; // end while loop
+    };
 
 // ************************* finds score ***************************  
 
-  function scoreFind( scores, week, game, home, away ) {
+    function scoreFind( scores, week, game, home, away ) {
 
-      var homeFinal = 0,
-        awayFinal = 0,
-        result,
-        scoresLength = scores.length;     
+        var homeFinal = 0,
+          awayFinal = 0,
+          result,
+          scoresLength = scores.length;     
 
-      for ( result = 0; result < scoresLength; result++ ) {
-        if ( scores[ result ].homeName == home && scores[ result ].awayName == away ) {
-          console.log("Home: " + scores[ result ].homeName + " " + home);
-          console.log("Away: " + scores[ result ].awayName + " " + away);
-          homeFinal = scores[ result ].homeScore;
-          awayFinal = scores[ result ].awayScore;
-          console.log(homeFinal + " " + awayFinal);
+        for ( result = 0; result < scoresLength; result++ ) {
+          if ( scores[ result ].homeName == home && scores[ result ].awayName == away ) {
+            console.log("Home: " + scores[ result ].homeName + " " + home);
+            console.log("Away: " + scores[ result ].awayName + " " + away);
+            homeFinal = scores[ result ].homeScore;
+            awayFinal = scores[ result ].awayScore;
+            console.log(homeFinal + " " + awayFinal);
+          };
         };
-      };
 
-      writePane( week, game, home, away, homeFinal, awayFinal );
+        writePane( week, game, home, away, homeFinal, awayFinal );
 
-  };
+    };
 
 // ************************* write pane ***************************  
 
-  function writePane( week, game, home, away, homeFinal, awayFinal ) {
-    $( "#pane" + week + " tbody" ).append( "<tr><td class='teams'>" + home + " vs. " + away + "</td><td class='final'>" + homeFinal + " - " + awayFinal + "</td><td class='report'><a class='score' data-week='" + week + "' data-game='" + game + "' href='#scoreModal' data-toggle='modal'>Report Score</a></td></tr>" );
-  };
-
-// *********************** set active pane ************************   
-
-  function setPane( activePane ) {
-    if ( activePane ) { 
-      $( "#tab" + activePane ).addClass( "active" );
-      $( "#pane" + activePane ).addClass( "active" );
-    } else { 
-      $( "#tab0" ).addClass( "active" );
-      $( "#pane0" ).addClass( "active" );
+    function writePane( week, game, home, away, homeFinal, awayFinal ) {
+      $( "#pane" + week + " tbody" ).append( "<tr><td class='teams'>" + home + " vs. " + away + "</td><td class='final'>" + homeFinal + " - " + awayFinal + "</td><td class='report'><a class='score' data-week='" + week + "' data-game='" + game + "' href='#scoreModal' data-toggle='modal'>Report Score</a></td></tr>" );
     };
-  };
+
+  // *********************** set active pane ************************   
+
+    function setPane( activePane ) {
+      if ( activePane ) { 
+        $( "#tab" + activePane ).addClass( "active" );
+        $( "#pane" + activePane ).addClass( "active" );
+      } else { 
+        $( "#tab0" ).addClass( "active" );
+        $( "#pane0" ).addClass( "active" );
+      };
+    };
 
 // ********************* declares season winner ************************ 
 
-  function declareWinners( leagueLength ){
+    function declareWinners( leagueLength ){
 
-    var leader = [], 
-      gamesTotal; //array to be filled with team names of standings winner(s)
+      var leader = [], 
+        gamesTotal; //array to be filled with team names of standings winner(s)
 
-    if ( leagueLength == 4) {
-      gamesTotal = 6; 
-    }
-    else if ( leagueLength == 5 ) {
-      gamesTotal = 10; 
-    } 
-    else if ( leagueLength == 6 ) {
-      gamesTotal = 15;
-    }
-    else if ( leagueLength == 7 ) {
-      gamesTotal = 21;
-    }
-    else if ( leagueLength == 8 ) {
-      gamesTotal = 28;
-    }
-
-    $.ajax({
-      url: "/backliftapp/games",
-      type: "GET",
-      dataType: "JSON",
-      success: function( gamesData ) {
-
-        if ( gamesTotal == gamesData.length && gamesData.length != 0 ) { 
-
-          $.ajax({
-            url: "/backliftapp/teams", 
-            type: "GET",
-            dataType: "JSON",
-            success: function( teamData ) {
-
-              getLeader( teamData, leader );
-              writePennant( leader );
-              $( "#pennantModal" ).modal( "show" ); 
-              pennantRestart( leagueLength ); //wipes games and results, sets w/l's to 0
-
-            }
-          }); // end team list GET
-        } // end if
+      if ( leagueLength == 4) {
+        gamesTotal = 6; 
       }
-    }); // end game results GET
-  }; 
+      else if ( leagueLength == 5 ) {
+        gamesTotal = 10; 
+      } 
+      else if ( leagueLength == 6 ) {
+        gamesTotal = 15;
+      }
+      else if ( leagueLength == 7 ) {
+        gamesTotal = 21;
+      }
+      else if ( leagueLength == 8 ) {
+        gamesTotal = 28;
+      }
+
+      $.ajax({
+        url: "/backliftapp/games",
+        type: "GET",
+        dataType: "JSON",
+        success: function( gamesData ) {
+
+          if ( gamesTotal == gamesData.length && gamesData.length != 0 ) { 
+
+            $.ajax({
+              url: "/backliftapp/teams", 
+              type: "GET",
+              dataType: "JSON",
+              success: function( teamData ) {
+
+                getLeader( teamData, leader );
+                writePennant( leader );
+                $( "#pennantModal" ).modal( "show" ); 
+                pennantRestart( leagueLength ); //wipes games and results, sets w/l's to 0
+
+              }
+            }); // end team list GET
+          } // end if
+        }
+      }); // end game results GET
+    }; 
 
 // ********************** determines league winner ************************   
 
@@ -653,58 +685,58 @@
 
 // ********************** write pennant announcement *************************
 
-function writePennant( leader ) {
+    function writePennant( leader ) {
 
-  $( "#winnerAnnouncement" ).html( "" );
+      $( "#winnerAnnouncement" ).html( "" );
 
-  if ( leader.length === 1 ) {
-    $( "<h3>" + leader[ 0 ] + " has won the pennant!</h3>" ).appendTo( '#winnerAnnouncement' );
-  }
-  else if ( leader.length === 2 ) { 
-    $( "<h3>" + leader[ 0 ] + " & " + leader[ 1 ] + " have won the pennant!</h3>" ).appendTo( "#winnerAnnouncement" );
-  }
-  else { 
-    var winnerList, 
-      winner, 
-      leaderLength = leader.length, 
-      lastWinner;
+      if ( leader.length === 1 ) {
+        $( "<h3>" + leader[ 0 ] + " has won the pennant!</h3>" ).appendTo( '#winnerAnnouncement' );
+      }
+      else if ( leader.length === 2 ) { 
+        $( "<h3>" + leader[ 0 ] + " & " + leader[ 1 ] + " have won the pennant!</h3>" ).appendTo( "#winnerAnnouncement" );
+      }
+      else { 
+        var winnerList, 
+          winner, 
+          leaderLength = leader.length, 
+          lastWinner;
 
-    winnerList = leader[ 0 ] + ", ";
-    for ( winner = 1; winner < leaderLength - 1; winner++ ) {
-      if ( leader.length != 0 ) { 
-        winnerList = winnerList + leader[ winner ] + ", "; 
+        winnerList = leader[ 0 ] + ", ";
+        for ( winner = 1; winner < leaderLength - 1; winner++ ) {
+          if ( leader.length != 0 ) { 
+            winnerList = winnerList + leader[ winner ] + ", "; 
+          }
+        };
+        lastWinner = "& " + leader[ leader.length -1 ];
+        $( "<h3>" + winnerList + lastWinner + " have won the pennant!</h3>" ).appendTo( "#winnerAnnouncement" );
       }
     };
-    lastWinner = "& " + leader[ leader.length -1 ];
-    $( "<h3>" + winnerList + lastWinner + " have won the pennant!</h3>" ).appendTo( "#winnerAnnouncement" );
-  }
-};
 
 // *********************** restart season (pennant) ************************
 
-  function pennantRestart( leagueLength ) {
+    function pennantRestart( leagueLength ) {
 
-    wipeGames(); 
+      wipeGames(); 
 
-    // set team wins/losses to 0
-    var team;
+      // set team wins/losses to 0
+      var team;
 
-    for ( team = 0; team < leagueLength; team ++ ) {
-      $.ajax({
-        url: "/backliftapp/teams/" + league[ team ].id,
-        type: "PUT",
-        dataType: "JSON",
-        data: { 
-          wins: 0,
-          losses: 0,
-          percentage: 0
-        }
-      });
-    };
+      for ( team = 0; team < leagueLength; team ++ ) {
+        $.ajax({
+          url: "/backliftapp/teams/" + league[ team ].id,
+          type: "PUT",
+          dataType: "JSON",
+          data: { 
+            wins: 0,
+            losses: 0,
+            percentage: 0
+          }
+        });
+      };
 
-    resetSeasonLock(); 
+      resetSeasonLock(); 
 
-  }; 
+    }; 
 
 // ********************** report score ************************
 
