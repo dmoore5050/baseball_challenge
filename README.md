@@ -52,3 +52,12 @@ Additional technical information:<br />
   <li>we have dedicated functions that refresh our standings and schedule tables, respectively</li>
   <li>we attempted to structure our script by the order in which elements are loaded into the DOM; when no logical ordering was apparent, we prioritized the sections by which elements users would interact with first</li>
 </ul>
+
+Refactoring accomplishments:
+
+*   Cleared team validation and form fields; added form reset button as well.
+*   Added play again functionality - on last score being entered, modal pops up announcing the season winner(s) and resetting results and start servers, and setting win/loss/percentage to 0.
+*   Totally refactored save score and update schedule functions, refactoring monolithic code block into smaller, more managable functions. 
+*   Renamed generic variables (data, i, j, etc,) to more descriptive names.
+*   General refactoring to add whitespace.
+
